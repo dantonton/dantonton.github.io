@@ -1,15 +1,107 @@
+@import '~perfect-scrollbar/css/perfect-scrollbar.css';
+
 .tudo {
 
     background: rgba(122,122,122,1);
-    background: -moz-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(36,45,51,1) 100%);
-    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, rgba(122,122,122,1)), color-stop(100%, rgba(36,45,51,1)));
-    background: -webkit-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(36,45,51,1) 100%);
-    background: -o-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(36,45,51,1) 100%);
-    background: -ms-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(36,45,51,1) 100%);
-    background: radial-gradient(ellipse at center, rgba(122,122,122,1) 0%, rgba(36,45,51,1) 100%);
+    background: -moz-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgb(81, 86, 90) 100%);
+    background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, rgba(122,122,122,1)), color-stop(100%, rgba(81, 86, 90,1)));
+    background: -webkit-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(81, 86, 90,1) 100%);
+    background: -o-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(81, 86, 90,1) 100%);
+    background: -ms-radial-gradient(center, ellipse cover, rgba(122,122,122,1) 0%, rgba(81, 86, 90,1) 100%);
+    background: radial-gradient(ellipse at center, rgba(122,122,122,1) 0%, rgba(81, 86, 90,1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7a7a7a', endColorstr='#242d33', GradientType=1 );
-
-    width: 100%;
-    height: 100%;
-    
+    padding: 10px;
 }
+.escudo{
+    opacity: 0.5;
+    position: fixed;
+    width: 160px;
+    height: 160px;
+    background-color: blueviolet;
+    border-radius: 500px;
+    margin: 20px 170px;
+    text-align: center;
+}
+.logo-temp-i {
+    font-family: 'Inconsolata', monospace;
+    display: inline-block;
+    font-size: 90px;
+    text-rendering: auto;
+  line-height: normal;
+  font-weight: bold;
+}
+.logo-temp-i::after {
+    content: "[)";
+    
+    text-rendering: auto;
+
+}
+
+.barra{
+    opacity: 0.5;
+    position: fixed;
+    width: 500px;
+    height: 80px;
+    background-color: darkslategrey;
+    border-radius: 500px;
+    margin: 60px 0;
+}
+
+.sessao{
+    position: fixed;
+    width: 200px;
+    height:80px;
+
+}
+
+.base{
+    
+    height: 100%;
+    background-color: antiquewhite;
+    border-radius: 10px;
+}
+.sessao-lt{
+    margin: 20px 250px 100px 50px;
+}
+.sessao-rt{
+    margin: 20px 50px 100px 250px ;
+}
+.sessao-rb{
+    margin: 100px 50px 20px 250px ;
+}
+.sessao-lb{
+    margin: 100px 250px 20px 50px ;
+}
+
+
+.ativo-lt .sessao.sessao-lt {
+    width: calc(100% - 280px);
+    height:calc(100% - 130px)
+}
+.ativo-lt .sessao.sessao-lt .conteudo{
+    
+    height:calc(100% - 130px);
+}
+/*
+.sessao{
+    width: 200px;
+    background-color: antiquewhite;
+    border-radius: 10px;
+    margin: 10px;
+}*/
+.base .btn{
+    font-family: 'Inconsolata', monospace;
+    width: 100%;
+    height: 20px;
+    padding: 10px;
+}
+
+.base .conteudo{
+    width: 100%;
+    height: 30px;
+    padding: 10px;
+}
+
+.ativo-lt {
+    
+  }

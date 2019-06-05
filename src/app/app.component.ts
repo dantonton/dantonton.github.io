@@ -6,5 +6,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'dantontaasadon';
+  title = 'dantonton';
+
+  select_sessao = 'inativo';
+
+  clickEvent(){
+    this.select_sessao = 'asdad';       
+  }
 }
