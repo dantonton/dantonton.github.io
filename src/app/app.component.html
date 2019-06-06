@@ -2,10 +2,10 @@
 
 
 <div class="tudo" [ngClass]="select_sessao" fxLayout="column" fxFlexFill>
-    <div class="menu" fxFlex fxLayoutAlign="end end" >
+    <div class="menu" fxFlex [fxLayoutAlign]="layoutAlign" >
             <div class="sessao sessao-lt ">
                     <div class="base">
-                            <div class="btn"  (click)="select_sessao = 'ativo-lt'">
+                            <div class="btn"  (click)="clickEvent(1)">
                                 Software
                             </div>
                             
@@ -69,7 +69,7 @@
 
                                 <div class="conteudo">
                                     </div> 
-                                    <div class="btn"  (click)="select_sessao = 'ativo-lb'">
+                                    <div class="btn"  (click)="clickEvent(3)">
                                             Design
                                         </div>
                     </div>
@@ -78,7 +78,7 @@
                         
             <div class="sessao sessao-rt">
                     <div class="base">
-                            <div class="btn"   (click)="select_sessao = 'ativo-rt'">
+                            <div class="btn"   (click)="clickEvent(2)">
                                 2222
                             </div>
                             <div class="conteudo">
@@ -89,12 +89,12 @@
             <div class="sessao sessao-rb">
                     <div class="base">
                             
-    
+                        <div class="btn"  (click)="clickEvent(4)">
+                                444
+                            </div>
                                 <div class="conteudo">
                                     </div> 
-                                    <div class="btn"  (click)="select_sessao = 'ativo-rb'">
-                                            444
-                                        </div>
+                                   
                     </div>
                         
             </div>
@@ -102,7 +102,7 @@
           <div class="barra">
                 
                 </div>
-        <div class="escudo logo-temp"  (click)="select_sessao = 'inativo'" fxFlex fxLayoutAlign="center center">
+        <div class="escudo logo-temp"  (click)="clickEvent(0)" fxFlex fxLayoutAlign="center center">
             <span class="logo-temp-i"></span>
           </div>
 
