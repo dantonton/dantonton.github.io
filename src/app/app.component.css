@@ -13,14 +13,15 @@
     padding: 10px;
 }
 .escudo{
-    opacity: 0.5;
+    opacity: 1;
     position: fixed;
-    width: 160px;
-    height: 160px;
-    background-color: blueviolet;
+    width: 140px;
+    height: 140px;
+    background-color: rgb(136, 0, 102);
     border-radius: 500px;
-    margin: 20px 170px;
+    margin: 40px 190px;
     text-align: center;
+    color: #fff;
 }
 .logo-temp-i {
     font-family: 'Inconsolata', monospace;
@@ -38,13 +39,15 @@
 }
 
 .barra{
-    opacity: 0.5;
+    opacity: 1;
     position: fixed;
     width: 500px;
     height: 80px;
-    background-color: darkslategrey;
+    background-color: #333;
     border-radius: 500px;
     margin: 60px 0;
+    font-family: 'Inconsolata', monospace;
+    color: rgb(0, 255, 0);
 }
 
 .sessao{
@@ -52,6 +55,7 @@
     width: 200px;
     height:80px;
 
+    transition: width 0.3s, height 0.3s;
 }
 
 .base{
@@ -59,7 +63,42 @@
     height: 100%;
     background-color: antiquewhite;
     border-radius: 10px;
+    transition: transform 0.2s;
 }
+.sessao-lt .base:hover{
+    transform: rotate(-5deg) scale(0.9) translateX(-18px)  translateY(-5px);
+    }
+    .sessao-rt .base:hover{
+        
+    transform: rotate(5deg) scale(0.9) translateX(18px)  translateY(-5px);
+    }
+    .sessao-rb .base:hover{
+        
+    transform: rotate(-5deg) scale(0.9) translateX(18px)  translateY(5px);
+    }
+    .sessao-lb .base:hover{
+        
+    transform: rotate(5deg) scale(0.9) translateX(-18px)  translateY(5px);
+    }
+.sessao-lt .base{
+transform: rotate(-5deg) scale(0.9) translateX(-18px);
+}
+.sessao-rt .base{
+    
+transform: rotate(5deg) scale(0.9) translateX(18px);
+}
+.sessao-rb .base{
+    
+transform: rotate(-5deg) scale(0.9) translateX(18px);
+}
+.sessao-lb .base{
+    
+transform: rotate(5deg) scale(0.9) translateX(-18px);
+}
+.sessao-rb .base-social{
+    
+transform: rotate(-5deg) scale(0.9) translateX(18px);
+    }
 .sessao-lt{
     margin: 20px 250px 100px 50px;
 }
@@ -75,36 +114,48 @@
 
 
 .ativo-lt .sessao.sessao-lt {width: calc(100% - 280px);height:calc(100% - 130px)}
-.ativo-lt .sessao.sessao-lt .conteudo{height:calc(100% - 30px);}
+.ativo-lt .sessao.sessao-lt .conteudo{height:calc(100% - 50px);}
+.ativo-lt .sessao.sessao-lt .base{transform: none;}
 
 .ativo-rt .sessao.sessao-rt {width: calc(100% - 280px);height:calc(100% - 130px)}
-.ativo-rt .sessao.sessao-rt .conteudo{height:calc(100% - 30px);}
+.ativo-rt .sessao.sessao-rt .conteudo{height:calc(100% - 50px);}
+.ativo-rt .sessao.sessao-rt .base{transform: none;}
 
 .ativo-rb .sessao.sessao-rb {width: calc(100% - 280px);height:calc(100% - 130px)}
-.ativo-rb .sessao.sessao-rb .conteudo{height:calc(100% - 30px);}
+.ativo-rb .sessao.sessao-rb .conteudo{height:calc(100% - 50px);}
+.ativo-rb .sessao.sessao-rb .base{transform: none;}
 
 .ativo-lb .sessao.sessao-lb {width: calc(100% - 280px);height:calc(100% - 130px)}
-.ativo-lb .sessao.sessao-lb .conteudo{height:calc(100% - 30px);}
-/*
-.sessao{
-    width: 200px;
-    background-color: antiquewhite;
-    border-radius: 10px;
-    margin: 10px;
-}*/
+.ativo-lb .sessao.sessao-lb .conteudo{height:calc(100% - 50px);}
+.ativo-lb .sessao.sessao-lb .base{transform: none;}
+
 .base .btn{
     font-family: 'Inconsolata', monospace;
     width: auto;
-    height: 20px;
+    height: 40px;
     padding: 10px;
+}
+.base .btn span{
+    margin-right: 5px;
 }
 
 .base .conteudo{
     width: auto;
-    height: 30px;
-    padding: 10px;
+    height: 0;
+    padding: 0 10px;
 }
 
-.ativo-lt {
-    
-  }
+.btn-social{
+    background-color: #fff;
+    border-radius: 10px;
+    height: 25px;
+    width: 44px;
+    padding: 50px 0 5px 0;
+    text-align: center;
+    transition: transform 0.2s;
+    transform: none;
+}
+.btn-social:hover{
+        
+    transform:  translateY(5px);
+    }

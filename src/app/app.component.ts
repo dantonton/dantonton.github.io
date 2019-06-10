@@ -27,10 +27,10 @@ export class AppComponent {
       this.select_sessao = 'ativo-rt';
     }else if(sel == 3){
       this.layoutAlign ='end start';
-      this.select_sessao = 'ativo-rb';
+      this.select_sessao = 'ativo-lb';
     }else if(sel == 4){
       this.layoutAlign ='start start';
-      this.select_sessao = 'ativo-lb';
+      this.select_sessao = 'ativo-rb';
     }
 
     this.selecionado = sel;
