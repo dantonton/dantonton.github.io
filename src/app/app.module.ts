@@ -8,6 +8,7 @@ import {MatIconModule} from '@angular/material/icon';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { PERFECT_SCROLLBAR_CONFIG } from 'ngx-perfect-scrollbar';
 import { PerfectScrollbarConfigInterface } from 'ngx-perfect-scrollbar';
+import { GalleryModule } from '@ngx-gallery/core';
 
 import { AppComponent } from './app.component';
 
@@ -20,6 +21,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     AppComponent
   ],
   imports: [
+    GalleryModule,
     BrowserModule,
     BrowserAnimationsModule,
     FlexLayoutModule,
