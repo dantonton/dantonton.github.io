@@ -1,0 +1,614 @@
+.body {
+  &::-webkit-scrollbar-track {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background-color: #f6f5ea;
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #f6f5ea;
+  }
+  &::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #c6c6ba;
+  }
+  font-family: monospace;
+  overflow: hidden;
+
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(122, 128, 132, 1);
+  background: -moz-radial-gradient(
+    center,
+    ellipse cover,
+    rgba(122, 128, 132, 1) 0%,
+    rgb(81, 86, 90) 100%
+  );
+  background: -webkit-gradient(
+    radial,
+    center center,
+    0px,
+    center center,
+    100%,
+    color-stop(0%, rgba(122, 128, 132, 1)),
+    color-stop(100%, rgba(81, 86, 90, 1))
+  );
+  background: -webkit-radial-gradient(
+    center,
+    ellipse cover,
+    rgba(122, 128, 132, 1) 0%,
+    rgba(81, 86, 90, 1) 100%
+  );
+  background: -o-radial-gradient(
+    center,
+    ellipse cover,
+    rgba(122, 128, 132, 1) 0%,
+    rgba(81, 86, 90, 1) 100%
+  );
+  background: -ms-radial-gradient(
+    center,
+    ellipse cover,
+    rgba(122, 128, 132, 1) 0%,
+    rgba(81, 86, 90, 1) 100%
+  );
+  background: radial-gradient(
+    ellipse at center,
+    rgba(122, 128, 132, 1) 0%,
+    rgba(81, 86, 90, 1) 100%
+  );
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7a7a7a', endColorstr='#242d33', GradientType=1 );
+
+  > .content {
+    position: relative;
+    z-index: 0;
+
+    .brand {
+      position: relative;
+      user-select: none;
+      .shape1 {
+        position: absolute;
+        width: 700px;
+        height: 80px;
+        left: -350px;
+        top: -40px;
+        background-color: #35364a;
+        border-radius: 500px;
+
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+
+        .label1,
+        .label3 {
+          font-size: 18px;
+          text-rendering: auto;
+          color: #d5cb86;
+        }
+      }
+
+      .shape2 {
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        left: -70px;
+        top: -70px;
+        background-color: #d5cb86;
+        border-radius: 500px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .label2 {
+          font-size: 90px;
+          text-rendering: auto;
+          color: #35364a;
+          font-weight: bold;
+        }
+      }
+    }
+
+    .session {
+      position: absolute;
+      width: 200px;
+      height: 72px;
+      &.session-lt {
+        bottom: 0;
+        right: 80px;
+      }
+      &.session-rt {
+        bottom: 0;
+        left: 80px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      &.session-rb {
+        top: 0;
+        left: 80px;
+        .btn {
+            align-items: flex-end;
+        }
+        .drop {
+          width: 20px;
+          height: 20px;
+          max-width: 500px;
+          max-height: calc(100vh - 300px);
+          background-color: #dfddce;
+          border-radius: 36px;          
+          margin-right: 50px;
+          transform: translateY(10px) translateX(-24px) scaleX(8);
+          position: absolute;
+          z-index: -1;
+          .drop-title {
+            opacity: 0;
+            margin-top: 12px;
+            text-align: center;
+          }
+          .drop-content {
+            opacity: 0;
+            padding: 30px;
+            text-indent: 50px;
+          }
+        }
+      }
+
+      &.session-lb {
+        top: 0;
+        right: 80px;
+        .btn{
+          padding: 0;
+          align-items: flex-start;
+          .title{
+            margin-bottom: 10px;
+          }
+        }
+        .portifolio-hint{
+          position: absolute;
+          z-index: 1;
+          width: 0;
+          height: 0;
+          max-height: calc(100vh - 300px);
+          .portifolio-scroll{
+            height: 100%;
+            width: 20000px;
+            display: flex;    
+            left: 0;
+            position: absolute;
+            transition-duration: 200ms;
+            transition-property: left;
+
+            .portifolio-item{
+              margin-right: -200px;
+              .portifolio-card{
+                width: 200px;
+                height: 100%;
+                border-radius: 36px;
+                background-color: #beb5b4;
+                box-shadow: 0 0 0px rgb(0 0 0 / 20%);
+                overflow: auto;
+                transition-duration: 200ms;
+                transition-property: box-shadow, transform;
+                &.portifolio-card-active{
+                  transform: scale(2);
+                  box-shadow: 0 0 30px rgb(0 0 0 / 20%);
+
+                }
+                .portifolio-content{
+                  margin: 30px;
+                }
+
+              }
+            }
+          }
+        }
+      }
+
+      .btn {
+        height: 100%;
+        border-radius: 36px;
+        background-color: #dfddce;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        cursor: pointer;
+        flex-direction: column;
+        //overflow: hidden;
+        &.--full {
+          width: 100%;
+        }
+        &.--top {
+          justify-content: flex-start;
+        }
+        &.--bottom {
+          justify-content: flex-end;
+        }
+        &.btn-social {
+          justify-content: flex-start;
+        }
+        .title {
+          //height: 20px;
+          font-weight: bold;
+          width: 100%;
+          text-align: center;
+        }
+        > .content {
+          opacity: 0;
+          overflow-y: scroll;
+          margin: 16px;
+          padding: 10px;
+          img {
+            margin: 10px;
+          }
+        }
+      }
+    }
+  }
+  &.--null {
+  }
+
+  &.--active-lt {
+    > .content {
+      animation: space-top 300ms ease-out forwards;
+      .session.session-lt {
+        animation: button-top 300ms ease-out forwards,
+          elastic 300ms ease-out forwards;
+        .btn{
+            > .title{
+                font-size: 18px;
+            }
+            > .content {
+                animation: fade 500ms linear 300ms forwards;
+              }
+        } 
+      }
+    }
+  }
+  &.--desactive-lt {
+    > .content {
+      animation: space-top-close 100ms ease-out reverse forwards;
+      .session.session-lt {
+        animation: button-top-close 100ms ease-out reverse forwards;
+      }
+    }
+  }
+
+  &.--active-rb {
+    > .content {
+      animation: space-bot 300ms ease-out forwards;
+      .session.session-rb {
+        animation: open-session-rb 50ms ease-out forwards;
+        .btn{
+            justify-content: center;
+            .title{
+                font-size: 18px;
+            }
+        }
+        .drop1 {
+          --dripEnd: 60px;
+          animation: 
+            tension-drip 500ms ease-out 800ms forwards,
+            drip 200ms ease-out 1300ms forwards,
+            drip-to-btn 100ms ease-out 1500ms forwards;
+          .drop-title {
+            animation: fade 200ms linear 1600ms forwards;
+          }
+        }
+        .drop2 {
+          --dripEnd: 102px;
+          animation: 
+           tension-drip 500ms ease-out 400ms forwards,
+            drip 300ms ease-out 900ms both,
+            drip-to-btn 100ms ease-out 1200ms both;
+          .drop-title {
+            animation: fade 200ms linear 1300ms both;
+          }
+        }
+        .drop3 {
+          --dripEnd: 144px;
+          animation: tension-drip 500ms ease-out forwards,
+            drip 400ms ease-out 500ms forwards,
+            drip-to-btn 100ms ease-out 900ms forwards;
+          .drop-title {
+            animation: fade 200ms linear 1000ms forwards;
+          }
+        }
+      }
+    }
+    >.--service-1.content .session.session-rb {
+      .drop1 {
+            animation: drip-to-open 500ms ease-out both;
+            .drop-content{
+              animation: fade 200ms linear 500ms forwards;
+
+            }
+          }
+    }
+    >.--service-2.content .session.session-rb {
+      .drop2 {
+            animation: drip-to-open 500ms ease-out both;
+            .drop-content{
+              animation: fade 200ms linear 500ms forwards;
+
+            }
+          }
+    } 
+    >.--service-3.content .session.session-rb {
+      .drop3 {
+            animation: drip-to-open 500ms ease-out both;
+            .drop-content{
+              animation: fade 200ms linear 500ms forwards;
+
+            }
+          }
+    }
+    >.--desactive-service-1.content .session.session-rb {
+      .drop1 {
+            animation: open-to-drip 200ms ease-out both;
+          }
+    }
+    >.--desactive-service-2.content .session.session-rb {
+      .drop2 {
+            animation: open-to-drip 200ms ease-out both;
+          }
+    } 
+    >.--desactive-service-3.content .session.session-rb {
+      .drop3 {
+            animation: open-to-drip 200ms ease-out both;
+          }
+    }
+  }
+  &.--desactive-rb {
+    > .content {
+      animation: space-bot-close 100ms ease-out reverse forwards;
+    }
+  }
+  &.--active-lb {
+    > .content {
+      animation: space-bot 300ms ease-out forwards;
+      .session.session-lb {
+        animation: open-session-rb 50ms ease-out forwards;
+        .btn{
+            justify-content: center;
+            .title{
+                font-size: 18px;
+            }
+        }
+        .portifolio-hint{
+          animation: 
+          open-portifolio-hint 50ms ease-out 200ms forwards,
+          fade 50ms ease-out 50ms forwards;
+
+          .portifolio-item{
+            animation: 
+            open-portifolio-item 250ms ease-out 500ms forwards;
+
+          }
+          
+        }
+      }
+    }
+  }
+}
+//lb
+@keyframes open-portifolio-item {
+  0% {
+    margin-right: -200px;
+  }
+  100% {
+    margin-right: 10px;
+  }
+}
+@keyframes open-portifolio-hint {
+  0% {
+    top: 0;
+    height: 0;
+    width: 0;
+  }
+  100% {
+    top: 84px;
+    height: 260px;
+    width: 600px;
+  }
+}
+
+//rb
+@keyframes open-to-drip {
+    0% {
+         width: 500px;
+          height: 500px;
+      transform: translateY(418px) translateX(0) scale(1);
+    }
+    30%{
+        height: 40px;
+        width: 280px;
+        transform: translateY(418px) translateX(280px) scale(0.5);
+    }
+    70%{
+
+        height: 40px;
+        width: 280px;
+        transform: translateY(var(--dripEnd)) translateX(280px) scale(0.5);
+    }
+
+    100% {
+      height: 40px;
+      width: 280px;
+      transform: translateY(var(--dripEnd)) translateX(0) scale(1);
+      }
+  }
+  @keyframes drip-to-open {
+    0% {
+      height: 40px;
+      width: 280px;
+      transform: translateY(var(--dripEnd)) translateX(0) scale(0.5);
+    }
+    30%{
+        height: 40px;
+        width: 280px;
+        transform: translateY(var(--dripEnd)) translateX(-280px) scale(0.5);
+    }
+    70%{
+
+        height: 40px;
+        width: 280px;
+        transform: translateY(418px) translateX(-280px) scale(1);
+    }
+
+    100% {
+    //    height: calc(100vh - 300px);
+       width: 500px;
+        height: 500px;
+    //    width: 280px;
+    
+    transform: translateY(418px) translateX(0) scaleX(1);
+      }
+  }
+@keyframes drip-to-btn {
+    0% {
+      height: 20px;
+      width: 20px;
+    }
+  
+    5% {
+      height: 40px;
+      width: 40px;
+    }
+    100% {
+      height: 40px;
+      width: 280px;
+    }
+  }
+
+@keyframes tension-drip {
+  0% {
+    transform: translateY(10px) translateX(-24px) scaleX(8);
+  }
+  75%{
+      transform:  translateY(14px) translateX(10px) scaleX(2);
+  }
+  100% {
+    transform: translateY(14px) translateX(0) scaleX(1);
+  }
+}
+@keyframes drip {
+  0% {
+    transform: translateY(14px);
+  }
+  100% {
+    transform: translateY(var(--dripEnd));
+  }
+}
+
+@keyframes open-session-rb {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 50px;
+  }
+}
+
+@keyframes space-bot {
+  0% {
+    margin-bottom: 0;
+  }
+  100% {
+    //TODO: colocar calc( 50vh + 80px); para telas acima de 700px de altura
+    // altura do content maxima 510px
+    margin-bottom: calc(100vh - 200px);
+  }
+}
+@keyframes space-bot-close {
+  0% {
+    margin-bottom: 0;
+  }
+  100% {
+    margin-bottom: calc(100vh - 200px);
+  }
+}
+
+///lt
+
+@keyframes button-top {
+  from {
+    height: 72px;
+    bottom: 0;
+    right: 80px;
+    width: 200px;
+  }
+  to {
+    height: calc(100vh - 200px);
+    bottom: 82px;
+    right: -300px;
+    width: 600px;
+  }
+}
+@keyframes button-top-close {
+  from {
+    height: 72px;
+    bottom: 0;
+    right: 80px;
+    width: 200px;
+  }
+  to {
+    height: calc(100vh - 200px);
+    bottom: 82px;
+    right: -300px;
+    width: 600px;
+  }
+}
+
+@keyframes space-top {
+  0% {
+    margin-top: 0;
+  }
+  100% {
+    //TODO: colocar calc( 50vh + 80px); para telas acima de 700px de altura
+    // altura do content maxima 510px
+    margin-top: calc(100vh - 200px);
+  }
+}
+@keyframes space-top-close {
+  0% {
+    margin-top: 0;
+  }
+  100% {
+    margin-top: calc(100vh - 200px);
+  }
+}
+
+@keyframes elastic {
+  0% {
+    transform: translateX(0);
+    filter: blur(0);
+    -webkit-filter: blur(0);
+  }
+  50% {
+    transform: translateX(-30px);
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+  }
+  100% {
+    transform: translateX(0);
+    filter: blur(0);
+    -webkit-filter: blur(0);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

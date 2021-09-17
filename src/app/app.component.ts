@@ -3,37 +3,26 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'dantonton';
-  layoutAlign = 'center center';
-  select_sessao = 'inativo';
+  yearRalative = (new Date()).getFullYear() - 2011;
 
-  selecionado = 0;
+  sessionSelected = '--null';
+  serviceSelected = ['','',''];
+  portifolio = 0;
 
-  clickEvent(sel:number){
-    if(sel == 0 || sel == this.selecionado){
-      this.layoutAlign ='center center';
-      this.select_sessao = 'inativo';
-      this.selecionado = 0;
-      return;
-
-    }else if(sel == 1){
-      this.layoutAlign ='end end';
-      this.select_sessao = 'ativo-lt';
-    }else if(sel == 2){
-      this.layoutAlign ='start end';
-      this.select_sessao = 'ativo-rt';
-    }else if(sel == 3){
-      this.layoutAlign ='end start';
-      this.select_sessao = 'ativo-lb';
-    }else if(sel == 4){
-      this.layoutAlign ='start start';
-      this.select_sessao = 'ativo-rb';
+  activeSessionSelected(indexActive: number){
+    for (let index = 0; index < this.serviceSelected.length; index++) {
+      if(indexActive == index){
+        this.serviceSelected[index] = `--service-${index + 1}`;
+      }else{
+        if(this.serviceSelected[index].length > 9){
+          this.serviceSelected[index] = `--desactive-service-${index + 1}`;
+        }
+      }
+      
     }
-
-    this.selecionado = sel;
-    //this.select_sessao = 'asdad';       
   }
 }
