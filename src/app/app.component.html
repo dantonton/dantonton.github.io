@@ -90,35 +90,22 @@
                                         <div class="drop-title" >MiddleWare RFID</div>
                                         <div class="drop-content">
                                                 <p>
-                                                        <b>Eric Ries</b> em seu livro <a href="https://pt.wikipedia.org/wiki/Lean_startup">A Startup Enxuta</a> nos traz um conceito novo e 
-                                                        muito útil para o empreendedorismo atual. Para aqueles que tem uma ideia de negócio o de melhoria de processo. 
+                                                        Trata-se de um mediador entre os equipamentos receptadores de sinal RFID e o software final.
                                                 </p>
                                                 <p>
-                                                        Muitas vezes quando surgi a ideia na cabeça do cliente, ele busca implementar com todos os elementos e com uma perfeição 
-                                                        que muitas vezes inviabiliza a própria implementação da ideia ou na pior das hipoteses a ideia é implementada 
-                                                        mas não tem a adesão esperada levando-o a ter prejuizos.
+                                                        Este middleWare é mantido por mim e serve de apoio para empresas q querem abstrair a parte de RFID.
                                                 </p>
-                                                <p>
-                                                        Meu trabalho passa por uma mentoria para encontrarmos uma solução enxuta e viável. Além de desenvolver a solução e 
-                                                        conduzir para uma melhor implemenatação possível. Isso tudo até ter a implementação de um software completo que atenda por completo.
-                                                </p>
+                                                <img  src="../assets/serv/sica.png"  />
                                         </div>
                                 </div>
                                 <div class="drop drop3"  (click)="activeSessionSelected(2)">
                                         <div class="drop-title" >Toten de Auto Atendimento</div>
                                         <div class="drop-content">
                                                 <p>
-                                                        <b>Eric Ries</b> em seu livro <a href="https://pt.wikipedia.org/wiki/Lean_startup">A Startup Enxuta</a> nos traz um conceito novo e 
-                                                        muito útil para o empreendedorismo atual. Para aqueles que tem uma ideia de negócio o de melhoria de processo. 
+                                                        Tenho implementado um software q gerencia a cabine fotográfica, que serve para eventos como casamento, aniversários e comporativos.
                                                 </p>
                                                 <p>
-                                                        Muitas vezes quando surgi a ideia na cabeça do cliente, ele busca implementar com todos os elementos e com uma perfeição 
-                                                        que muitas vezes inviabiliza a própria implementação da ideia ou na pior das hipoteses a ideia é implementada 
-                                                        mas não tem a adesão esperada levando-o a ter prejuizos.
-                                                </p>
-                                                <p>
-                                                        Meu trabalho passa por uma mentoria para encontrarmos uma solução enxuta e viável. Além de desenvolver a solução e 
-                                                        conduzir para uma melhor implemenatação possível. Isso tudo até ter a implementação de um software completo que atenda por completo.
+                                                        Além de possuir outros toten de auto atentimento para facilidade do comércio.
                                                 </p>
                                         </div>
                                 </div>
@@ -130,11 +117,19 @@
                                 
                                 <div class="portifolio-hint">
                                         <div class="portifolio-scroll" [ngStyle]="{'left' : ((portifolio * -210) + 200 ) + 'px'}">
-                                                <div class="portifolio-item" *ngFor="let item of [0,1,2,3,4,5,6,7]"  (click)="portifolio = item < portifolio? portifolio - 1: portifolio + 1">
-                                                        <div class="portifolio-card" [class.portifolio-card-active]="item == portifolio">
+                                                <div class="portifolio-item" *ngFor="let item of portifolioList; let i = index"  (click)="portifolio = i < portifolio? portifolio - 1: portifolio + 1">
+                                                        <div class="portifolio-card" [class.portifolio-card-active]="i == portifolio">
+                                                                <div class="portifolio-title">
+                                                                        {{item.title}}
+                                                                </div>
                                                                 <div class="portifolio-content">
-                                                                
-                                                                        Ambev {{item}}
+                                                                        {{item.body}}
+                                                                </div>
+                                                                <div class="portifolio-img">
+                                                                        <div class="portifolio-col" *ngFor="let img of item.img; let ix = index">
+                                                                                
+                                                                        <img  [src]="img" (click)="openPort(item,ix)" />
+                                                                        </div>
                                                                 </div>
                                                         </div>
         
