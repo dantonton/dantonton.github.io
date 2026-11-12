@@ -1,0 +1,361 @@
+/*
+ * Geometria: o .dock é um ponto (0×0) no centro da tela. A pílula, o logo e as
+ * abas são posicionados em relação a ele usando as variáveis de styles.scss.
+ * Cada estado (is-profile, is-services, is-portfolio) só troca valores, e as
+ * transições CSS fazem o caminho de ida e o de volta.
+ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle, rgb(255 255 255 / 0.07) 1px, transparent 1.6px) 0 0 / 22px 22px,
+    radial-gradient(ellipse at center, var(--c-bg-center) 0%, var(--c-bg-edge) 100%);
+}
+
+.dock {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  translate: 0 0;
+  /* Na volta, espera o conteúdo sumir antes de recentralizar. */
+  transition: translate 460ms var(--ease-out) 140ms;
+
+  .is-profile & {
+    translate: 0 var(--shift);
+    transition-delay: 0ms;
+  }
+
+  .is-services &,
+  .is-portfolio & {
+    translate: 0 calc(-1 * var(--shift));
+    transition-delay: 0ms;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Abas creme
+   -------------------------------------------------------------------------- */
+.tab {
+  position: absolute;
+  z-index: 1;
+  width: var(--tab-w);
+  height: var(--tab-h);
+  border-radius: calc(var(--tab-h) / 2);
+  background: var(--c-cream);
+  color: var(--c-ink);
+  box-shadow: var(--shadow-1);
+}
+
+.tab__title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--tab-fs);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Abas de baixo: Portfólio e Serviços */
+.tab--bottom {
+  top: 0;
+  translate: 0 0;
+  transition:
+    translate 260ms var(--ease-out),
+    background-color 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out);
+
+  .tab__title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc((var(--peek) - 1em) / 2);
+    transition: scale 260ms var(--ease-out);
+  }
+
+  &:hover {
+    translate: 0 3px;
+    background: var(--c-cream-100);
+  }
+}
+
+.tab--portfolio {
+  right: var(--tab-x);
+}
+
+.tab--services {
+  left: var(--tab-x);
+}
+
+.is-portfolio .tab--portfolio,
+.is-services .tab--services {
+  translate: 0 var(--tab-drop);
+  background: var(--c-cream-100);
+  box-shadow: var(--shadow-2);
+
+  .tab__title {
+    scale: 1.2;
+  }
+}
+
+/* Aba do Perfil: se expande e vira o painel */
+.tab--profile {
+  right: var(--tab-x);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  translate: 0 0;
+  /* Fechando: some o conteúdo, encolhe a altura e depois a largura. */
+  transition:
+    bottom 320ms var(--ease-out) 90ms,
+    height 320ms var(--ease-out) 90ms,
+    right 300ms var(--ease-out) 220ms,
+    width 300ms var(--ease-out) 220ms,
+    border-radius 300ms var(--ease-out) 220ms,
+    box-shadow 300ms var(--ease-out),
+    translate 200ms var(--ease-out),
+    background-color 200ms var(--ease-out);
+
+  .stage:not(.is-profile) &:hover {
+    translate: 0 -3px;
+    background: var(--c-cream-100);
+  }
+
+  /* Abrindo: alarga com um leve "elástico" e depois cresce para cima. */
+  .is-profile & {
+    right: calc(var(--panel-w) / -2);
+    bottom: calc(var(--tab-h) + var(--panel-gap));
+    width: var(--panel-w);
+    height: var(--panel-h);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2);
+    transition:
+      right 380ms var(--ease-spring),
+      width 380ms var(--ease-spring),
+      bottom 460ms var(--ease-out) 100ms,
+      height 460ms var(--ease-out) 100ms,
+      border-radius 300ms var(--ease-out),
+      box-shadow 300ms var(--ease-out);
+  }
+}
+
+.tab__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+.tab__header {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  height: var(--peek);
+  transition: height 300ms var(--ease-out);
+
+  .is-profile & {
+    height: 64px;
+  }
+
+  .tab__title {
+    transition: font-size 300ms var(--ease-out);
+
+    .is-profile & {
+      font-size: 20px;
+    }
+  }
+}
+
+.close {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--c-ink);
+  opacity: 0;
+  transition:
+    opacity 120ms linear,
+    background-color 150ms var(--ease-out);
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  &:hover {
+    background: rgb(31 32 48 / 0.08);
+  }
+
+  .is-profile & {
+    opacity: 1;
+    transition:
+      opacity 220ms var(--ease-out) 420ms,
+      background-color 150ms var(--ease-out);
+  }
+}
+
+.tab__body {
+  flex: 1;
+  min-height: 0;
+  /* Largura fixa: o texto não fica refluindo enquanto o painel cresce. */
+  width: var(--panel-w);
+  padding: 4px 32px 28px;
+  opacity: 0;
+  transition: opacity 120ms linear;
+
+  .is-profile & {
+    opacity: 1;
+    transition: opacity 280ms var(--ease-out) 420ms;
+  }
+
+  @media (max-width: 600px) {
+    padding: 4px 20px 24px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Redes sociais
+   -------------------------------------------------------------------------- */
+.social {
+  position: absolute;
+  z-index: 1;
+  left: var(--tab-x);
+  bottom: 0;
+  display: flex;
+  gap: var(--social-gap);
+}
+
+.social__link {
+  display: flex;
+  justify-content: center;
+  width: var(--social);
+  height: var(--tab-h);
+  padding-top: calc((var(--peek) - var(--social-icon)) / 2);
+  border-radius: calc(var(--social) / 2);
+  background: var(--c-cream);
+  color: var(--c-navy);
+  box-shadow: var(--shadow-1);
+  translate: 0 0;
+  transition:
+    translate 200ms var(--ease-out),
+    background-color 200ms var(--ease-out),
+    color 200ms var(--ease-out);
+
+  svg {
+    width: var(--social-icon);
+    height: var(--social-icon);
+    fill: currentColor;
+  }
+
+  &:hover {
+    translate: 0 -4px;
+    background: var(--c-gold);
+    color: var(--c-navy-900);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Pílula e logo
+   -------------------------------------------------------------------------- */
+.brand {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: 0;
+}
+
+.pill {
+  position: absolute;
+  left: calc(var(--pill-w) / -2);
+  top: calc(var(--pill-h) / -2);
+  display: grid;
+  grid-template-columns: 1fr var(--circle) 1fr;
+  align-items: center;
+  width: var(--pill-w);
+  height: var(--pill-h);
+  border-radius: 999px;
+  background: var(--c-navy);
+  box-shadow: var(--shadow-2);
+}
+
+.pill__label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--label-fs);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: var(--c-gold);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pill__label--role {
+  grid-column: 3;
+}
+
+.logo {
+  position: absolute;
+  left: calc(var(--circle) / -2);
+  top: calc(var(--circle) / -2);
+  display: grid;
+  place-items: center;
+  width: var(--circle);
+  height: var(--circle);
+  padding-bottom: 0.06em;
+  border-radius: 50%;
+  background: var(--c-gold);
+  color: var(--c-navy);
+  font-family: var(--font-mono);
+  font-size: var(--logo-fs);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  box-shadow: var(--shadow-2);
+  transition: scale 260ms var(--ease-spring);
+
+  &:hover {
+    scale: 1.04;
+  }
+
+  &:active {
+    scale: 0.97;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Rodapé
+   -------------------------------------------------------------------------- */
+.footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.55);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 300ms var(--ease-out) 400ms;
+
+  .is-open & {
+    opacity: 0;
+    transition-delay: 0ms;
+  }
+}

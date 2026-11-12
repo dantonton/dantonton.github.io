@@ -1,27 +1,47 @@
-# Dantonton
+# dantonton.github.io
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.0.1.
+Site pessoal de Dânton Moura, publicado no GitHub Pages a partir da raiz da branch `master`.
 
-## Development server
+Feito em Angular 22 (standalone, zoneless e signals), sem bibliotecas de UI. Animações em CSS puro.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Ambiente
 
-## Code scaffolding
+```bash
+nvm use            # Node 24 LTS (definido em .nvmrc)
+npm install
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Desenvolvimento
 
-## Build
+```bash
+npm start          # http://localhost:4200
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Links diretos para cada estado: `#perfil`, `#servicos/2`, `#portfolio/3`.
 
-## Running unit tests
+## Publicação
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+npm run deploy     # ng build + copia dist/dantonton/browser para a raiz
+git add -A && git commit -m "..." && git push
+```
 
-## Running end-to-end tests
+O `scripts/deploy.mjs` apaga da raiz apenas os artefatos de build anteriores (listados em
+`.deploy-manifest.json`) e nunca toca em `src/`, `public/` ou nos arquivos de configuração.
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+## Estrutura
 
-## Further help
+```
+src/app/
+  app.*                 pílula, abas, estado global, clique fora, Esc
+  data/content.ts       todos os textos (perfil, skills, serviços, portfólio)
+  profile-panel/        conteúdo do Perfil
+  services-panel/       "gotas" de Serviços (acordeão)
+  portfolio-carousel/   carrossel com scroll-snap, arrastar, roda e teclado
+  lightbox/             imagem em tela cheia
+src/styles.scss         tokens (cores, fontes, layout) e base
+public/assets/          imagens (WebP)
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Todo o layout deriva das variáveis em `src/styles.scss` (`--pill-w`, `--circle`, `--tab-w`,
+`--panel-h`…), ajustadas por media queries até 360px de largura.

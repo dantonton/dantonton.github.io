@@ -1,0 +1,46 @@
+@for (service of items(); track service.id; let i = $index) {
+  <div
+    class="drop"
+    data-inside
+    [style.--i]="i"
+    [style.--inner-h]="innerHeight(i)"
+    [class.is-active]="active() === i"
+    [class.is-after]="active() !== null && i > active()!"
+  >
+    <button
+      type="button"
+      class="drop__title"
+      [attr.aria-expanded]="active() === i"
+      [attr.aria-controls]="'service-' + service.id"
+      (click)="select(i)"
+    >
+      <span>{{ service.title }}</span>
+      <svg class="drop__chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
+    </button>
+
+    <div class="drop__content scroll-y" [id]="'service-' + service.id" [inert]="active() !== i">
+      <div #inner class="drop__inner">
+        @for (paragraph of service.paragraphs; track $index) {
+          <p [innerHTML]="paragraph"></p>
+        }
+        @if (service.bullets) {
+          <ul>
+            @for (bullet of service.bullets; track $index) {
+              <li>{{ bullet }}</li>
+            }
+          </ul>
+        }
+        @if (service.image; as image) {
+          <button
+            type="button"
+            class="drop__figure"
+            aria-label="Ampliar imagem"
+            (click)="zoom(service)"
+          >
+            <img [src]="image.src" [alt]="image.alt" width="471" height="471" loading="lazy" />
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

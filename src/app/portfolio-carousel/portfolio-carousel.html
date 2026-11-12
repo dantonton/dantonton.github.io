@@ -1,0 +1,63 @@
+<div class="track" #track (pointerdown)="onPointerDown($event)">
+  @for (item of items(); track item.title; let i = $index) {
+    <!-- O slot não tem transform: o Chrome calcula o scroll-snap pela caixa transformada. -->
+    <div #slot class="slot" [style.--i]="i">
+    <article
+      class="card"
+      data-inside
+      [class.is-active]="active() === i"
+      (click)="onCardClick(i)"
+    >
+      <div class="card__media" [class.card__media--mobile]="item.mobile" [style.--cols]="item.images.length">
+        @for (image of item.images; track image.src; let ix = $index) {
+          <button
+            type="button"
+            class="card__shot"
+            [attr.aria-label]="'Ampliar imagem ' + (ix + 1) + ' de ' + item.title"
+            (click)="onImageClick(i, ix, $event)"
+          >
+            <img [src]="image.thumb" alt="" loading="lazy" decoding="async" draggable="false" />
+          </button>
+        }
+        <span class="card__zoom" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" /></svg>
+        </span>
+      </div>
+
+      <div class="card__body">
+        <h3 class="card__title">
+          <button type="button" [attr.aria-pressed]="active() === i">{{ item.title }}</button>
+        </h3>
+        <p class="card__summary">{{ item.summary }}</p>
+        <ul class="card__tags" aria-label="Categorias">
+          @for (tag of item.tags; track tag) {
+            <li>{{ tag }}</li>
+          }
+        </ul>
+      </div>
+    </article>
+    </div>
+  }
+</div>
+
+<div class="controls" data-inside>
+  <button
+    type="button"
+    class="controls__btn"
+    aria-label="Projeto anterior"
+    [disabled]="current() === 0"
+    (click)="step(-1)"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+  </button>
+  <span class="controls__count" aria-live="polite">{{ current() + 1 }} / {{ items().length }}</span>
+  <button
+    type="button"
+    class="controls__btn"
+    aria-label="Próximo projeto"
+    [disabled]="current() === items().length - 1"
+    (click)="step(1)"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+  </button>
+</div>

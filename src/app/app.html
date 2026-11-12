@@ -1,0 +1,118 @@
+<main
+  class="stage"
+  [class.is-open]="section() !== 'none'"
+  [class.is-profile]="section() === 'profile'"
+  [class.is-services]="section() === 'services'"
+  [class.is-portfolio]="section() === 'portfolio'"
+  (click)="onStageClick($event)"
+>
+  <div class="dock">
+    <!-- Perfil: a aba creme se expande e vira o painel -->
+    <section #profileTab class="tab tab--profile" data-inside aria-labelledby="profile-title">
+      @if (section() !== 'profile') {
+        <button
+          type="button"
+          class="tab__hit"
+          aria-controls="profile-body"
+          aria-expanded="false"
+          (click)="toggle('profile')"
+        >
+          <span class="sr-only">Abrir perfil</span>
+        </button>
+      }
+      <header class="tab__header">
+        <h2 class="tab__title" id="profile-title">Perfil</h2>
+        <button
+          type="button"
+          class="close"
+          aria-label="Fechar perfil"
+          [inert]="section() !== 'profile'"
+          (click)="reset()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </header>
+      <div class="tab__body scroll-y" id="profile-body" [inert]="section() !== 'profile'">
+        <app-profile-panel [yearsCoding]="yearsCoding" />
+      </div>
+    </section>
+
+    <nav class="social" aria-label="Redes sociais" data-inside>
+      @for (link of socialLinks; track link.href) {
+        <a
+          class="social__link"
+          [href]="link.href"
+          [attr.aria-label]="link.label"
+          [attr.title]="link.label"
+          [attr.target]="link.href.startsWith('mailto:') ? null : '_blank'"
+          rel="noopener noreferrer"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="link.icon" /></svg>
+        </a>
+      }
+    </nav>
+
+    <button
+      type="button"
+      class="tab tab--bottom tab--portfolio"
+      data-inside
+      aria-controls="portfolio-region"
+      [attr.aria-expanded]="section() === 'portfolio'"
+      (click)="toggle('portfolio')"
+    >
+      <span class="tab__title">Portfólio</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab tab--bottom tab--services"
+      data-inside
+      aria-controls="services-region"
+      [attr.aria-expanded]="section() === 'services'"
+      (click)="toggle('services')"
+    >
+      <span class="tab__title">Serviços</span>
+    </button>
+
+    <app-services-panel
+      id="services-region"
+      [open]="section() === 'services'"
+      [items]="services"
+      [active]="activeService()"
+      (selectItem)="selectService($event)"
+      (openImage)="lightbox.set($event)"
+    />
+
+    <app-portfolio-carousel
+      id="portfolio-region"
+      [open]="section() === 'portfolio'"
+      [items]="portfolio"
+      [active]="activeCard()"
+      (activate)="activeCard.set($event)"
+      (openImage)="lightbox.set($event)"
+    />
+
+    <div class="brand">
+      <div class="pill">
+        <h1 class="pill__label">Dânton Moura</h1>
+        <p class="pill__label pill__label--role">Dev Full Stack</p>
+      </div>
+      <button type="button" class="logo" aria-label="Voltar ao início" (click)="reset()">
+        <span aria-hidden="true">[)</span>
+      </button>
+    </div>
+  </div>
+
+  <footer class="footer">© {{ year }} Dânton Moura</footer>
+</main>
+
+@if (lightbox(); as data) {
+  <app-lightbox
+    animate.enter="lb-enter"
+    animate.leave="lb-leave"
+    [data]="data"
+    (closed)="lightbox.set(null)"
+  />
+}

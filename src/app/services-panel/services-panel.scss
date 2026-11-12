@@ -1,0 +1,241 @@
+/*
+ * Região abaixo da pílula. As gotas começam escondidas atrás da aba Serviços
+ * (top/translate) e, ao abrir, caem (top, ease-in), vão para o centro
+ * (translate) e se alargam (width). Na volta, o caminho é o inverso.
+ */
+:host {
+  --drop-h: 44px;
+  --drop-gap: 8px;
+  --drop-w: min(380px, 100% - 48px);
+  /* Altura do item aberto: o que sobra da região depois dos outros itens */
+  --open-h: calc(var(--region-h) - (var(--n) - 1) * (var(--drop-h) + var(--drop-gap)));
+  /* Centro da aba Serviços, em relação ao centro da pílula */
+  --from-x: calc(var(--tab-x) + var(--tab-w) / 2);
+  /* "top" que deixa a gota no meio da aba (escondida atrás dela) */
+  --hide-y: calc(var(--tab-h) / 2 - var(--region-top));
+
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--panel-w) / -2);
+  top: var(--region-top);
+  width: var(--panel-w);
+  height: var(--region-h);
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0s linear 900ms;
+
+  @media (max-width: 600px) {
+    --drop-h: 40px;
+  }
+}
+
+:host(.is-open) {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.drop {
+  --rev: calc(var(--n) - 1 - var(--i));
+  --top: calc(var(--i) * (var(--drop-h) + var(--drop-gap)));
+  /* Altura do item aberto: o conteúdo inteiro, se couber. */
+  --item-h: min(var(--open-h), var(--drop-h) + var(--inner-h, 100vh));
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--hide-y);
+  width: 20px;
+  height: 20px;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: calc(var(--drop-h) / 2);
+  background: var(--c-cream);
+  box-shadow: var(--shadow-1);
+  translate: var(--from-x) 0;
+  scale: 2.4 0.7;
+  opacity: 0;
+  pointer-events: auto;
+  /* Fechando: encolhe, volta para baixo da aba e sobe para dentro dela. */
+  transition:
+    width 180ms var(--ease-out) calc(var(--rev) * 50ms),
+    height 180ms var(--ease-out) calc(var(--rev) * 50ms),
+    border-radius 180ms var(--ease-out) calc(var(--rev) * 50ms),
+    box-shadow 180ms var(--ease-out),
+    translate 200ms var(--ease-out) calc(var(--rev) * 50ms + 120ms),
+    top 240ms var(--ease-out) calc(var(--rev) * 50ms + 260ms),
+    scale 200ms var(--ease-out) calc(var(--rev) * 50ms + 300ms),
+    opacity 120ms linear calc(var(--rev) * 50ms + 420ms),
+    background-color 200ms var(--ease-out);
+
+  &:not(.is-active):hover {
+    background: var(--c-cream-100);
+  }
+}
+
+/* Abrindo: a gota "estica" na aba, cai, vai para o centro e se alarga. */
+:host(.is-open) .drop {
+  top: var(--top);
+  width: var(--drop-w);
+  height: var(--drop-h);
+  translate: 0 0;
+  scale: 1;
+  opacity: 1;
+  transition:
+    opacity 80ms linear calc(var(--i) * 110ms),
+    scale 260ms var(--ease-out) calc(var(--i) * 110ms),
+    top 320ms var(--ease-in) calc(var(--i) * 110ms + 40ms),
+    height 220ms var(--ease-out) calc(var(--i) * 110ms + 300ms),
+    translate 300ms var(--ease-out) calc(var(--i) * 110ms + 340ms),
+    width 360ms var(--ease-spring) calc(var(--i) * 110ms + 340ms),
+    border-radius 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    background-color 200ms var(--ease-out);
+}
+
+/* Depois da entrada: abrir/fechar itens sem atrasos. */
+:host(.is-open.is-settled) .drop {
+  transition:
+    top 380ms var(--ease-out),
+    width 380ms var(--ease-spring),
+    height 380ms var(--ease-out),
+    border-radius 300ms var(--ease-out),
+    box-shadow 300ms var(--ease-out),
+    translate 200ms var(--ease-out),
+    scale 200ms var(--ease-out),
+    opacity 150ms var(--ease-out),
+    background-color 200ms var(--ease-out);
+}
+
+:host(.is-open) .drop.is-active {
+  z-index: 1;
+  width: 100%;
+  /* Até a altura do conteúdo, limitada ao espaço disponível. */
+  height: var(--item-h);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  background: var(--c-cream-100);
+}
+
+:host(.is-open) .drop.is-after {
+  top: calc(var(--top) + min(var(--open-h), var(--drop-h) + var(--active-inner-h, 100vh)) - var(--drop-h));
+}
+
+.drop__title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--drop-h);
+  padding: 0 44px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 100ms linear;
+
+  :host(.is-open) & {
+    opacity: 1;
+    transition: opacity 220ms var(--ease-out) calc(var(--i) * 110ms + 560ms);
+  }
+
+  :host(.is-open.is-settled) & {
+    transition: opacity 150ms var(--ease-out);
+  }
+
+  .is-active & {
+    font-size: 15px;
+  }
+
+  @media (max-width: 600px) {
+    font-size: 12px;
+    padding: 0 36px;
+
+    .is-active & {
+      font-size: 13px;
+    }
+  }
+}
+
+.drop__chevron {
+  position: absolute;
+  right: 16px;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: rotate 300ms var(--ease-out);
+
+  .is-active & {
+    rotate: 180deg;
+  }
+}
+
+.drop__content {
+  position: absolute;
+  top: var(--drop-h);
+  left: 50%;
+  translate: -50% 0;
+  /* Largura fixa: o texto não reflui enquanto o item cresce. */
+  width: var(--panel-w);
+  height: calc(var(--item-h) - var(--drop-h));
+  font-size: 15px;
+  line-height: 1.65;
+  opacity: 0;
+  transition: opacity 100ms linear;
+
+  .is-active & {
+    opacity: 1;
+    transition: opacity 260ms var(--ease-out) 260ms;
+  }
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  ul {
+    margin: 4px 0 16px;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 6px;
+
+    &::marker {
+      color: var(--c-navy);
+    }
+  }
+}
+
+.drop__inner {
+  padding: 4px 32px 24px;
+
+  @media (max-width: 600px) {
+    padding: 4px 20px 20px;
+  }
+}
+
+.drop__figure {
+  display: block;
+  width: min(100%, 400px);
+  margin: 8px auto 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: var(--shadow-1);
+  cursor: zoom-in;
+
+  img {
+    width: 100%;
+    height: auto;
+    transition: scale 400ms var(--ease-out);
+  }
+
+  &:hover img {
+    scale: 1.03;
+  }
+}

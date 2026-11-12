@@ -1,53 +1,28 @@
 {
   "name": "dantonton",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "watch": "ng build --watch --configuration development",
+    "deploy": "ng build && node scripts/deploy.mjs"
   },
   "private": true,
+  "packageManager": "npm@11.19.1",
   "dependencies": {
-    "@angular/animations": "^8.0.2",
-    "@angular/cdk": "^8.0.1",
-    "@angular/common": "~8.0.0",
-    "@angular/compiler": "~8.0.0",
-    "@angular/core": "~8.0.0",
-    "@angular/flex-layout": "^8.0.0-beta.26",
-    "@angular/forms": "~8.0.0",
-    "@angular/material": "^8.0.1",
-    "@angular/platform-browser": "~8.0.0",
-    "@angular/platform-browser-dynamic": "~8.0.0",
-    "@angular/router": "~8.0.0",
-    "@ngx-gallery/core": "^5.0.0-beta.0",
-    "ngx-lightbox": "^2.5.2",
-    "ngx-perfect-scrollbar": "^7.2.1",
-    "rxjs": "~6.4.0",
-    "tslib": "^1.9.0",
-    "zone.js": "~0.9.1"
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.800.0",
-    "@angular/cli": "~8.0.1",
-    "@angular/compiler-cli": "~8.0.0",
-    "@angular/language-service": "~8.0.0",
-    "@types/node": "~8.9.4",
-    "@types/jasmine": "~3.3.8",
-    "@types/jasminewd2": "~2.0.3",
-    "codelyzer": "^5.0.0",
-    "jasmine-core": "~3.4.0",
-    "jasmine-spec-reporter": "~4.2.1",
-    "karma": "~4.1.0",
-    "karma-chrome-launcher": "~2.2.0",
-    "karma-coverage-istanbul-reporter": "~2.0.1",
-    "karma-jasmine": "~2.0.1",
-    "karma-jasmine-html-reporter": "^1.4.0",
-    "protractor": "~5.4.0",
-    "ts-node": "~7.0.0",
-    "tslint": "~5.15.0",
-    "typescript": "~3.4.3"
+    "@angular/build": "^22.2.6",
+    "@angular/cli": "^22.2.6",
+    "@angular/compiler-cli": "^22.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2"
   }
 }
