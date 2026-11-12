@@ -10,6 +10,7 @@ import {
   output,
   viewChild,
 } from '@angular/core';
+import { I18n } from '../i18n/i18n';
 
 export interface LightboxData {
   images: string[];
@@ -37,6 +38,8 @@ const SWIPE_MIN = 50;
 export class Lightbox {
   readonly data = input.required<LightboxData>();
   readonly closed = output<void>();
+
+  protected readonly t = inject(I18n).t;
 
   protected readonly index = linkedSignal(() => this.data().index);
   protected readonly count = computed(() => this.data().images.length);

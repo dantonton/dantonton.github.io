@@ -38,7 +38,8 @@
   --pill-w: min(700px, 100vw - 2 * var(--gutter));
   --pill-h: 80px;
   --circle: 140px;
-  --logo-fs: 84px;
+  /* Espessura das linhas do logo (círculo e quadrado) */
+  --line: 1.5px;
   --label-fs: 18px;
   --tab-h: 72px;
   /* Parte da aba que aparece para fora da pílula */
@@ -71,7 +72,7 @@
   :root {
     --pill-h: 64px;
     --circle: 96px;
-    --logo-fs: 56px;
+    --line: 1px;
     --label-fs: 14px;
     --tab-h: 60px;
     --tab-gap: 6px;
@@ -97,7 +98,6 @@
 @media (max-width: 380px) {
   :root {
     --circle: 88px;
-    --logo-fs: 50px;
     --label-fs: 12px;
   }
 }

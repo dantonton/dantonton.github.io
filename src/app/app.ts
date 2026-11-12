@@ -3,12 +3,15 @@ import {
   ElementRef,
   Injector,
   afterNextRender,
+  computed,
   effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { CODING_SINCE, PORTFOLIO, SERVICES, SOCIAL_LINKS } from './data/content';
+import { CODING_SINCE, PROJECTS, SERVICES, SOCIAL_LINKS } from './data/content';
+import { DICTIONARIES, I18n, LANGUAGES } from './i18n/i18n';
+import { PortfolioItem, Service } from './i18n/texts';
 import { Lightbox, LightboxData } from './lightbox/lightbox';
 import { PortfolioCarousel } from './portfolio-carousel/portfolio-carousel';
 import { ProfilePanel } from './profile-panel/profile-panel';
@@ -16,13 +19,6 @@ import { ServicesPanel } from './services-panel/services-panel';
 
 export type Section = 'none' | 'profile' | 'services' | 'portfolio';
 type OpenSection = Exclude<Section, 'none'>;
-
-/** Links diretos: #perfil, #servicos/2, #portfolio/3 … */
-const HASHES: Record<OpenSection, string> = {
-  profile: 'perfil',
-  services: 'servicos',
-  portfolio: 'portfolio',
-};
 
 @Component({
   selector: 'app-root',
@@ -35,11 +31,21 @@ const HASHES: Record<OpenSection, string> = {
   },
 })
 export class App {
+  protected readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
+  protected readonly languages = LANGUAGES;
+
   protected readonly socialLinks = SOCIAL_LINKS;
-  protected readonly services = SERVICES;
-  protected readonly portfolio = PORTFOLIO;
   protected readonly year = new Date().getFullYear();
   protected readonly yearsCoding = this.year - CODING_SINCE;
+
+  /** Dados neutros + textos do idioma atual. */
+  protected readonly services = computed<Service[]>(() =>
+    SERVICES.map((service) => ({ ...service, ...this.t().services[service.id] })),
+  );
+  protected readonly portfolio = computed<PortfolioItem[]>(() =>
+    PROJECTS.map((project) => ({ ...project, ...this.t().projects[project.id] })),
+  );
 
   protected readonly section = signal<Section>('none');
   protected readonly activeService = signal<number | null>(null);
@@ -106,24 +112,31 @@ export class App {
     this.activeService.update((current) => (current === index ? null : index));
   }
 
+  /** Links diretos: #perfil / #profile, #servicos/2 / #services/2, #portfolio/3. */
   protected readHash(): void {
     const [name, sub] = decodeURIComponent(location.hash.slice(1)).split('/');
-    const entry = Object.entries(HASHES).find(([, hash]) => hash === name);
-    const section = (entry?.[0] as OpenSection | undefined) ?? 'none';
+    let section: Section = 'none';
+    for (const dictionary of Object.values(DICTIONARIES)) {
+      const match = (Object.keys(dictionary.hashes) as OpenSection[]).find(
+        (key) => dictionary.hashes[key] === name,
+      );
+      if (match) section = match;
+    }
     const index = Number(sub) - 1;
 
     this.lightbox.set(null);
     this.section.set(section);
     this.activeService.set(
-      section === 'services' && index >= 0 && index < this.services.length ? index : null,
+      section === 'services' && index >= 0 && index < SERVICES.length ? index : null,
     );
     this.activeCard.set(
-      section === 'portfolio' && index >= 0 && index < this.portfolio.length ? index : null,
+      section === 'portfolio' && index >= 0 && index < PROJECTS.length ? index : null,
     );
   }
 
   private writeHash(): void {
     const section = this.section();
+    const hashes = this.t().hashes;
     let hash = '';
     if (section !== 'none') {
       const sub =
@@ -132,7 +145,7 @@ export class App {
           : section === 'portfolio'
             ? this.activeCard()
             : null;
-      hash = `#${HASHES[section]}${sub !== null ? `/${sub + 1}` : ''}`;
+      hash = `#${hashes[section]}${sub !== null ? `/${sub + 1}` : ''}`;
     }
     if (hash !== location.hash) {
       history.replaceState(history.state, '', `${location.pathname}${location.search}${hash}`);

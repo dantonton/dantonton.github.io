@@ -11,7 +11,8 @@ import {
   signal,
   viewChildren,
 } from '@angular/core';
-import { Service } from '../data/content';
+import { I18n } from '../i18n/i18n';
+import { Service } from '../i18n/texts';
 import { LightboxData } from '../lightbox/lightbox';
 
 /**
@@ -34,6 +35,8 @@ export class ServicesPanel {
   readonly open = input(false);
   readonly items = input.required<Service[]>();
   readonly active = input<number | null>(null);
+
+  protected readonly t = inject(I18n).t;
 
   readonly selectItem = output<number>();
   readonly openImage = output<LightboxData>();
@@ -87,6 +90,6 @@ export class ServicesPanel {
 
   protected zoom(service: Service): void {
     if (!service.image) return;
-    this.openImage.emit({ images: [service.image.src], index: 0, title: service.title });
+    this.openImage.emit({ images: [service.image], index: 0, title: service.title });
   }
 }

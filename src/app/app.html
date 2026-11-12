@@ -17,15 +17,15 @@
           aria-expanded="false"
           (click)="toggle('profile')"
         >
-          <span class="sr-only">Abrir perfil</span>
+          <span class="sr-only">{{ t().tabs.openProfile }}</span>
         </button>
       }
       <header class="tab__header">
-        <h2 class="tab__title" id="profile-title">Perfil</h2>
+        <h2 class="tab__title" id="profile-title">{{ t().tabs.profile }}</h2>
         <button
           type="button"
           class="close"
-          aria-label="Fechar perfil"
+          [attr.aria-label]="t().tabs.closeProfile"
           [inert]="section() !== 'profile'"
           (click)="reset()"
         >
@@ -39,7 +39,7 @@
       </div>
     </section>
 
-    <nav class="social" aria-label="Redes sociais" data-inside>
+    <nav class="social" [attr.aria-label]="t().social" data-inside>
       @for (link of socialLinks; track link.href) {
         <a
           class="social__link"
@@ -62,7 +62,7 @@
       [attr.aria-expanded]="section() === 'portfolio'"
       (click)="toggle('portfolio')"
     >
-      <span class="tab__title">Portfólio</span>
+      <span class="tab__title">{{ t().tabs.portfolio }}</span>
     </button>
 
     <button
@@ -73,13 +73,13 @@
       [attr.aria-expanded]="section() === 'services'"
       (click)="toggle('services')"
     >
-      <span class="tab__title">Serviços</span>
+      <span class="tab__title">{{ t().tabs.services }}</span>
     </button>
 
     <app-services-panel
       id="services-region"
       [open]="section() === 'services'"
-      [items]="services"
+      [items]="services()"
       [active]="activeService()"
       (selectItem)="selectService($event)"
       (openImage)="lightbox.set($event)"
@@ -88,7 +88,7 @@
     <app-portfolio-carousel
       id="portfolio-region"
       [open]="section() === 'portfolio'"
-      [items]="portfolio"
+      [items]="portfolio()"
       [active]="activeCard()"
       (activate)="activeCard.set($event)"
       (openImage)="lightbox.set($event)"
@@ -97,12 +97,29 @@
     <div class="brand">
       <div class="pill">
         <h1 class="pill__label">Dânton Moura</h1>
-        <p class="pill__label pill__label--role">Dev Full Stack</p>
+        <p class="pill__label pill__label--role">{{ t().brand.role }}</p>
       </div>
-      <button type="button" class="logo" aria-label="Voltar ao início" (click)="reset()">
-        <span aria-hidden="true">[)</span>
+      <!-- Logo só em CSS: disco dourado, círculo e quadrado (::before/::after) e o [) -->
+      <button type="button" class="logo" [attr.aria-label]="t().brand.home" (click)="reset()">
+        <span class="logo__mark" aria-hidden="true">[)</span>
       </button>
     </div>
+  </div>
+
+  <div class="lang" role="group" [attr.aria-label]="t().language" data-inside>
+    @for (option of languages; track option.code) {
+      <button
+        type="button"
+        class="lang__btn"
+        [attr.lang]="option.htmlLang"
+        [attr.aria-label]="option.name"
+        [attr.title]="option.name"
+        [attr.aria-pressed]="i18n.lang() === option.code"
+        (click)="i18n.setLang(option.code)"
+      >
+        {{ option.short }}
+      </button>
+    }
   </div>
 
   <footer class="footer">© {{ year }} Dânton Moura</footer>

@@ -310,7 +310,15 @@
   grid-column: 3;
 }
 
+/*
+ * Logo só em CSS: disco dourado, com um círculo (::before) e um quadrado
+ * (::after) concêntricos de linha fina. O círculo tem ~1,16× o lado do
+ * quadrado, então os cantos do quadrado passam dele.
+ */
 .logo {
+  --sq: calc(var(--circle) * 0.6);
+  --ring: calc(var(--circle) * 0.7);
+
   position: absolute;
   left: calc(var(--circle) / -2);
   top: calc(var(--circle) / -2);
@@ -318,17 +326,33 @@
   place-items: center;
   width: var(--circle);
   height: var(--circle);
-  padding-bottom: 0.06em;
   border-radius: 50%;
   background: var(--c-gold);
   color: var(--c-navy);
-  font-family: var(--font-mono);
-  font-size: var(--logo-fs);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.04em;
   box-shadow: var(--shadow-2);
   transition: scale 260ms var(--ease-spring);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    border: var(--line) solid currentColor;
+    pointer-events: none;
+  }
+
+  &::before {
+    width: var(--ring);
+    height: var(--ring);
+    border-radius: 50%;
+  }
+
+  &::after {
+    width: var(--sq);
+    height: var(--sq);
+  }
 
   &:hover {
     scale: 1.04;
@@ -336,6 +360,71 @@
 
   &:active {
     scale: 0.97;
+  }
+}
+
+.logo__mark {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: calc(var(--circle) * 0.4);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  /* Compensa o espaço que o letter-spacing deixa à direita. */
+  margin-right: -0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   Idioma
+   -------------------------------------------------------------------------- */
+.lang {
+  position: absolute;
+  z-index: 5;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgb(228 225 211 / 0.94);
+  box-shadow: var(--shadow-1);
+  transition:
+    opacity 250ms var(--ease-out) 350ms,
+    visibility 0s linear 350ms;
+
+  /* Em telas estreitas a pílula sobe até o topo quando uma seção abre. */
+  @media (max-width: 899px) {
+    .is-open & {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 150ms var(--ease-out),
+        visibility 0s linear 150ms;
+    }
+  }
+}
+
+.lang__btn {
+  min-width: 38px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--c-ink-soft);
+  transition:
+    background-color 200ms var(--ease-out),
+    color 200ms var(--ease-out);
+
+  &:hover {
+    color: var(--c-ink);
+  }
+
+  &[aria-pressed='true'] {
+    background: var(--c-navy);
+    color: var(--c-gold);
   }
 }
 

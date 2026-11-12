@@ -13,7 +13,8 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { PortfolioItem } from '../data/content';
+import { I18n } from '../i18n/i18n';
+import { PortfolioItem } from '../i18n/texts';
 import { LightboxData } from '../lightbox/lightbox';
 
 const DRAG_THRESHOLD = 6;
@@ -44,6 +45,8 @@ export class PortfolioCarousel {
   readonly open = input(false);
   readonly items = input.required<PortfolioItem[]>();
   readonly active = input<number | null>(null);
+
+  protected readonly t = inject(I18n).t;
 
   readonly activate = output<number | null>();
   readonly openImage = output<LightboxData>();

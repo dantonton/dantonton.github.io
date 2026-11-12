@@ -4,7 +4,7 @@
       class="image"
       animate.enter="lb-img-enter"
       [src]="image"
-      [alt]="data().title + (count() > 1 ? ' — imagem ' + (index() + 1) + ' de ' + count() : '')"
+      [alt]="count() > 1 ? t().lightbox.imageOf(data().title, index() + 1, count()) : data().title"
       draggable="false"
     />
   }
@@ -18,14 +18,14 @@
 </p>
 
 @if (count() > 1) {
-  <button type="button" class="nav nav--prev" aria-label="Imagem anterior" (click)="go(-1)">
+  <button type="button" class="nav nav--prev" [attr.aria-label]="t().lightbox.previous" (click)="go(-1)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
   </button>
-  <button type="button" class="nav nav--next" aria-label="Próxima imagem" (click)="go(1)">
+  <button type="button" class="nav nav--next" [attr.aria-label]="t().lightbox.next" (click)="go(1)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
   </button>
 }
 
-<button #closeButton type="button" class="close" aria-label="Fechar imagem" (click)="closed.emit()">
+<button #closeButton type="button" class="close" [attr.aria-label]="t().lightbox.close" (click)="closed.emit()">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
 </button>

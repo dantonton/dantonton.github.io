@@ -34,10 +34,10 @@
           <button
             type="button"
             class="drop__figure"
-            aria-label="Ampliar imagem"
+            [attr.aria-label]="t().enlargeImage"
             (click)="zoom(service)"
           >
-            <img [src]="image.src" [alt]="image.alt" width="471" height="471" loading="lazy" />
+            <img [src]="image" [alt]="service.imageAlt ?? ''" width="471" height="471" loading="lazy" />
           </button>
         }
       </div>

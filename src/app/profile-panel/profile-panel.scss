@@ -1,20 +1,9 @@
 :host {
   display: block;
+  max-width: 62ch;
   font-size: 15px;
   line-height: 1.65;
   color: var(--c-ink);
-}
-
-.photo {
-  float: right;
-  width: 140px;
-  height: 140px;
-  margin: 6px 0 12px 24px;
-  border-radius: var(--radius-md);
-  object-fit: cover;
-  box-shadow:
-    0 0 0 3px var(--c-gold),
-    var(--shadow-1);
 }
 
 p {
@@ -22,8 +11,8 @@ p {
 }
 
 .hello {
-  margin-top: 4px;
-  font-size: 18px;
+  margin-top: 8px;
+  font-size: 20px;
 }
 
 .cta-row {
@@ -71,9 +60,7 @@ p {
 }
 
 .heading {
-  clear: both;
   margin: 28px 0 12px;
-  padding-top: 4px;
   font-family: var(--font-mono);
   font-size: 16px;
   font-weight: 700;
@@ -92,17 +79,4 @@ p {
 
 .skills__head {
   font-weight: 700;
-}
-
-@media (max-width: 600px) {
-  .photo {
-    float: none;
-    width: 112px;
-    height: 112px;
-    margin: 8px auto 16px;
-  }
-
-  .hello {
-    text-align: center;
-  }
 }

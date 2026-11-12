@@ -1,19 +1,8 @@
-<img
-  class="photo"
-  src="assets/profile/danton-moura.webp"
-  width="160"
-  height="160"
-  alt="Foto de Dânton Moura"
-  decoding="async"
-/>
+@let text = t().profile;
 
-<p class="hello">Olá, sou <strong>Dânton Moura</strong>.</p>
-<p>
-  Formado em Sistemas de Informação pelo IFES, com 3 anos de experiência como designer e
-  {{ yearsCoding() }} anos como programador, a maior parte deles no ecossistema Microsoft:
-  C#, .NET e Web API.
-</p>
-<p>Se você quer levar o seu projeto a outro nível, fale comigo.</p>
+<p class="hello">{{ text.hello }} <strong>Dânton Moura</strong>.</p>
+<p>{{ text.about(yearsCoding()) }}</p>
+<p>{{ text.invite }}</p>
 
 <div class="cta-row">
   <a class="cta" [href]="'mailto:' + email">
@@ -22,20 +11,20 @@
         d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"
       />
     </svg>
-    Fale comigo
+    {{ text.cta }}
   </a>
   <a class="email" [href]="'mailto:' + email">{{ email }}</a>
 </div>
 
-<h3 class="heading">Skills</h3>
+<h3 class="heading">{{ text.skills }}</h3>
 <div class="skills" aria-hidden="true">
-  <div>{{ table.top }}</div>
-  <div class="skills__head">{{ table.head }}</div>
-  <div>{{ table.divider }}</div>
-  @for (row of table.rows; track $index) {
+  <div>{{ table().top }}</div>
+  <div class="skills__head">{{ table().head }}</div>
+  <div>{{ table().divider }}</div>
+  @for (row of table().rows; track $index) {
     <div>{{ row }}</div>
   }
-  <div>{{ table.bottom }}</div>
+  <div>{{ table().bottom }}</div>
 </div>
 <ul class="sr-only">
   @for (skill of skills; track skill.name) {

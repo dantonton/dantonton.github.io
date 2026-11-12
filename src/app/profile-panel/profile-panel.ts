@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { CONTACT_EMAIL, SKILLS, Skill } from '../data/content';
+import { I18n } from '../i18n/i18n';
 
 const NAME_W = 12;
 const BAR_W = 20;
@@ -13,7 +14,7 @@ interface AsciiTable {
 }
 
 /** Monta a tabela de skills em arte ASCII (39 colunas: cabe em telas de 360px). */
-function buildSkillsTable(skills: Skill[]): AsciiTable {
+function buildSkillsTable(skills: Skill[], skillColumn: string, levelColumn: string): AsciiTable {
   const padEnd = (text: string, width: number) => text + ' '.repeat(Math.max(0, width - text.length));
   const center = (text: string, width: number) => {
     const left = Math.floor((width - text.length) / 2);
@@ -24,7 +25,7 @@ function buildSkillsTable(skills: Skill[]): AsciiTable {
 
   return {
     top: rule('╔', '╤', '╗'),
-    head: `║ ${center('skill', NAME_W)} │ ${center('nível', BAR_W)} ║`,
+    head: `║ ${center(skillColumn, NAME_W)} │ ${center(levelColumn, BAR_W)} ║`,
     divider: rule('╠', '╪', '╣'),
     rows: skills.map((skill) => {
       const filled = Math.round((skill.level / 100) * BAR_W);
@@ -42,7 +43,10 @@ function buildSkillsTable(skills: Skill[]): AsciiTable {
 export class ProfilePanel {
   readonly yearsCoding = input.required<number>();
 
+  protected readonly t = inject(I18n).t;
   protected readonly email = CONTACT_EMAIL;
   protected readonly skills = SKILLS;
-  protected readonly table = buildSkillsTable(SKILLS);
+  protected readonly table = computed(() =>
+    buildSkillsTable(SKILLS, this.t().profile.skillColumn, this.t().profile.levelColumn),
+  );
 }

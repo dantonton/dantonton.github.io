@@ -1,5 +1,5 @@
 <div class="track" #track (pointerdown)="onPointerDown($event)">
-  @for (item of items(); track item.title; let i = $index) {
+  @for (item of items(); track item.id; let i = $index) {
     <!-- O slot não tem transform: o Chrome calcula o scroll-snap pela caixa transformada. -->
     <div #slot class="slot" [style.--i]="i">
     <article
@@ -13,7 +13,7 @@
           <button
             type="button"
             class="card__shot"
-            [attr.aria-label]="'Ampliar imagem ' + (ix + 1) + ' de ' + item.title"
+            [attr.aria-label]="t().portfolio.enlarge(ix + 1, item.title)"
             (click)="onImageClick(i, ix, $event)"
           >
             <img [src]="image.thumb" alt="" loading="lazy" decoding="async" draggable="false" />
@@ -29,7 +29,7 @@
           <button type="button" [attr.aria-pressed]="active() === i">{{ item.title }}</button>
         </h3>
         <p class="card__summary">{{ item.summary }}</p>
-        <ul class="card__tags" aria-label="Categorias">
+        <ul class="card__tags" [attr.aria-label]="t().portfolio.categories">
           @for (tag of item.tags; track tag) {
             <li>{{ tag }}</li>
           }
@@ -44,7 +44,7 @@
   <button
     type="button"
     class="controls__btn"
-    aria-label="Projeto anterior"
+    [attr.aria-label]="t().portfolio.previous"
     [disabled]="current() === 0"
     (click)="step(-1)"
   >
@@ -54,7 +54,7 @@
   <button
     type="button"
     class="controls__btn"
-    aria-label="Próximo projeto"
+    [attr.aria-label]="t().portfolio.next"
     [disabled]="current() === items().length - 1"
     (click)="step(1)"
   >
