@@ -19,6 +19,8 @@ const PROTECTED = new Set([
   '.git', '.github', '.vscode', '.angular', 'node_modules', 'dist', 'src', 'public', 'scripts',
   'package.json', 'package-lock.json', 'angular.json', 'tsconfig.json', 'tsconfig.app.json',
   'README.md', '.gitignore', '.editorconfig', '.prettierrc', '.nvmrc', '.deploy-manifest.json',
+  // Álbum do casamento: página e Worker independentes do Angular.
+  'casamento', 'casamento-api',
 ]);
 
 if (!existsSync(join(dist, 'index.html'))) {

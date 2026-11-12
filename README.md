@@ -45,3 +45,11 @@ public/assets/          imagens (WebP)
 
 Todo o layout deriva das variáveis em `src/styles.scss` (`--pill-w`, `--circle`, `--tab-w`,
 `--panel-h`…), ajustadas por media queries até 360px de largura.
+
+## Álbum do casamento
+
+`casamento/index.html` é uma página independente, sem Angular e sem build, servida em
+`https://dantonton.github.io/casamento/`. Os convidados enviam fotos e vídeos e veem o álbum. O
+backend é um Cloudflare Worker em `casamento-api/`, que guarda o acesso à pasta do OneDrive. A
+configuração está em [casamento-api/README.md](casamento-api/README.md). O `npm run deploy` nunca
+toca nessas duas pastas.

@@ -1,0 +1,30 @@
+// Worker do álbum do casamento. Passo a passo em README.md.
+// É .jsonc de propósito: o wrangler procura wrangler.json/.jsonc antes de .toml subindo as pastas,
+// então um wrangler.jsonc na raiz do repositório "ganharia" de um wrangler.toml aqui.
+{
+  "$schema": "https://unpkg.com/wrangler@4.152.0/config-schema.json",
+  "name": "casamento-api",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "vars": {
+    // Application (client) ID do app registrado no Azure/Entra (não é segredo).
+    "MS_CLIENT_ID": "4e4e2b6b-e039-4b3b-8632-2084bd72b774",
+    // Origens que podem usar a API. "http://localhost:*" é só para testes locais.
+    "ALLOWED_ORIGINS": "https://dantonton.github.io,http://localhost:*,http://127.0.0.1:*",
+    // Fuso usado no nome dos arquivos enviados.
+    "TIMEZONE": "America/Sao_Paulo"
+  },
+  // Segredos (não ficam neste arquivo): npx wrangler@4.152.0 secret put <NOME>
+  //   MS_CLIENT_SECRET  client secret do app no Azure/Entra
+  //   SHARE_URL         link de compartilhamento da pasta no OneDrive
+  //   APP_SECRET        texto aleatório longo (assina os tokens de exclusão)
+  //   ADMIN_KEY         texto aleatório para abrir /auth/start
+  // Para rodar localmente, os mesmos nomes vão em .dev.vars (ignorado pelo git).
+  "kv_namespaces": [
+    {
+      "binding": "ALBUM_KV",
+      "id": "e07a08f67dfa4945848570008d242d77"
+    }
+  ]
+}
