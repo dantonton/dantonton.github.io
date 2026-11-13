@@ -394,6 +394,7 @@ async function createUpload(request, env) {
 
   const folder = await getFolder(env);
   const author = cleanAuthor(body.author);
+  if (author.length < 2) throw new HttpError(400, 'name_required', 'Escreva seu nome para enviar');
   const newName = () => `${[stamp(env), author, randomId()].filter(Boolean).join('_')}.${ext}`;
 
   // Arquivo pequeno: vai inteiro num PUT só, direto pela API do Graph (sem URL de sessão).

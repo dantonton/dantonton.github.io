@@ -99,7 +99,7 @@
       font: 500 19px/1.35 var(--serif);
       text-wrap: balance;
     }
-    .send { display: grid; gap: 10px; }
+    .send { display: grid; gap: 10px; align-items: start; }
     .field input {
       width: 100%;
       height: 52px;
@@ -111,6 +111,8 @@
     }
     .field input::placeholder { color: #8d887a; }
     .field input:focus { border-color: var(--olive); outline: 2px solid var(--olive-soft); outline-offset: 0; }
+    .field.invalid input { border-color: var(--danger); outline: 2px solid rgb(155 58 46 / 0.22); outline-offset: 0; }
+    .field-error { display: block; margin: 6px 0 0 2px; color: var(--danger); font-size: 13px; line-height: 1.35; text-align: left; }
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -442,6 +444,7 @@
       bottom: max(90px, calc(env(safe-area-inset-bottom) + 84px));
       left: 50%;
       z-index: 70;
+      width: max-content;
       max-width: calc(100vw - 32px);
       padding: 12px 18px 10px;
       background: var(--olive);
@@ -468,7 +471,7 @@
 <body>
   <header class="hero">
     <img class="monogram" src="monogram.png" width="300" height="300" alt="Monograma Eliene e Dânton">
-    <p class="eyebrow">Álbum de fotos</p>
+    <p class="eyebrow">Álbum compartilhado</p>
     <h1 class="names">Eliene &amp; Dânton</h1>
     <p class="date">15 / 11 / 2026</p>
     <svg class="ornament" viewBox="0 0 54 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
@@ -478,9 +481,10 @@
     <p class="lead">Compartilhe com a gente as fotos e os vídeos que você fez da festa.</p>
 
     <div class="send">
-      <label class="field">
-        <span class="sr-only">Seu nome (opcional)</span>
-        <input id="author" type="text" maxlength="40" autocomplete="name" autocapitalize="words" placeholder="Seu nome (opcional)">
+      <label class="field" id="author-field">
+        <span class="sr-only">Seu nome</span>
+        <input id="author" type="text" maxlength="40" autocomplete="name" autocapitalize="words" placeholder="Seu nome" required aria-describedby="author-error">
+        <span class="field-error" id="author-error" hidden>Escreva seu nome para enviar fotos e vídeos.</span>
       </label>
       <button class="btn-primary" id="pick" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.6l1.4-2h7l1.4 2h1.6A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
@@ -488,7 +492,7 @@
       </button>
     </div>
     <input id="files" type="file" accept="image/*,video/*" multiple hidden>
-    <p class="hint">Tudo aparece no álbum para todos os convidados. Se mudar de ideia, você pode apagar o que enviou por este mesmo aparelho.</p>
+    <p class="hint">Seu nome aparece junto das fotos. Tudo fica visível para todos os convidados; se mudar de ideia, você pode apagar o que enviou por este mesmo aparelho.</p>
 
     <section class="queue" id="queue" hidden aria-live="polite">
       <div class="queue-head"><span id="queue-title"></span><span class="warn" id="queue-warn">Deixe esta página aberta</span></div>
@@ -592,6 +596,8 @@
     const $ = (id) => document.getElementById(id);
     const els = {
       author: $('author'),
+      authorField: $('author-field'),
+      authorError: $('author-error'),
       pick: $('pick'),
       files: $('files'),
       fab: $('fab'),
@@ -907,11 +913,39 @@
     els.author.addEventListener('input', () => {
       store.author = els.author.value.trim();
       saveStore();
+      if (nameIsValid()) setNameError(false);
     });
 
+    /** O nome é obrigatório: pelo menos 2 letras. */
+    function nameIsValid() {
+      return (els.author.value.match(/\p{L}/gu) ?? []).length >= 2;
+    }
+
+    function setNameError(show) {
+      els.authorField.classList.toggle('invalid', show);
+      els.authorError.hidden = !show;
+      els.author.setAttribute('aria-invalid', String(show));
+    }
+
+    function requireName() {
+      if (nameIsValid()) {
+        setNameError(false);
+        return true;
+      }
+      setNameError(true);
+      els.author.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      els.author.focus({ preventScroll: true });
+      toast('Escreva seu nome antes de enviar');
+      return false;
+    }
+
+    // A checagem é síncrona: o seletor de arquivos continua dentro do toque (exigência do iOS).
+    const pickFiles = () => {
+      if (requireName()) els.files.click();
+    };
     if (!CONFIGURED) els.pick.disabled = true;
-    els.pick.addEventListener('click', () => els.files.click());
-    els.fab.addEventListener('click', () => els.files.click());
+    els.pick.addEventListener('click', pickFiles);
+    els.fab.addEventListener('click', pickFiles);
     els.files.addEventListener('change', () => {
       addFiles([...els.files.files]);
       els.files.value = '';
@@ -926,7 +960,7 @@
     }
 
     function addFiles(files) {
-      if (!CONFIGURED) return;
+      if (!CONFIGURED || !requireName()) return;
       let skipped = 0;
       for (const file of files) {
         const type = kindOf(file);
