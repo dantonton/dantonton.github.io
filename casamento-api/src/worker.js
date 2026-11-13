@@ -54,15 +54,17 @@ const MIME_EXT = {
 /** Nome gerado no envio: 2026-12-20_21-14-03_Maria Silva_k3j9x2.jpg (o nome é opcional). */
 const NAME_RE = /^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}_(?:(.+)_)?[a-z0-9]{6}\.[a-z0-9]+$/i;
 
-/** Estado do isolate: sobrevive entre requisições enquanto o isolate estiver vivo. */
+/**
+ * Estado do isolate: sobrevive entre requisições enquanto o isolate estiver vivo.
+ * Guarda só DADOS, nunca promessas em andamento: no Cloudflare, aguardar numa requisição uma
+ * promessa (com fetch) criada por outra dá "Cannot perform I/O on behalf of a different request".
+ */
 const mem = {
   access: null,
-  refreshing: null,
   folder: null,
   list: null,
   byId: null,
   listAt: 0,
-  listing: null,
   redirects: new Map(),
   keys: null,
   /** Vira true se a URL de sessão só aceitar o PUT com o token (diagnóstico). */
@@ -91,9 +93,11 @@ export default {
       response = await route(request, env, new URL(request.url));
     } catch (err) {
       const known = err instanceof HttpError;
-      if (!known) console.error(err);
+      if (!known) console.error('erro inesperado', request.method, new URL(request.url).pathname, err?.stack ?? err);
       response = json(
-        { error: known ? err.code : 'internal', message: known ? err.message : 'Algo deu errado, tente de novo' },
+        known
+          ? { error: err.code, message: err.message }
+          : { error: 'internal', message: 'Algo deu errado, tente de novo', detail: String(err?.message ?? err).slice(0, 200) },
         known ? err.status : 500,
       );
     }
@@ -257,10 +261,7 @@ async function getAccessToken(env, force = false, minValidity = 60_000) {
       return cached.token;
     }
   }
-  mem.refreshing ??= refreshAccess(env).finally(() => {
-    mem.refreshing = null;
-  });
-  return mem.refreshing;
+  return refreshAccess(env);
 }
 
 async function refreshAccess(env) {
@@ -307,17 +308,11 @@ async function listItems(env) {
 
 async function getList(env, fresh = false) {
   if (!fresh && mem.list && Date.now() - mem.listAt < LIST_TTL) return mem.list;
-  mem.listing ??= fetchList(env)
-    .then((list) => {
-      mem.list = list;
-      mem.byId = new Map(list.map((item) => [item.id, item]));
-      mem.listAt = Date.now();
-      return list;
-    })
-    .finally(() => {
-      mem.listing = null;
-    });
-  return mem.listing;
+  const list = await fetchList(env);
+  mem.list = list;
+  mem.byId = new Map(list.map((item) => [item.id, item]));
+  mem.listAt = Date.now();
+  return list;
 }
 
 async function fetchList(env) {
@@ -369,7 +364,9 @@ function toItem(raw) {
 }
 
 async function findItem(env, id) {
-  await getList(env);
+  // Para conferir se o arquivo é do álbum, serve a lista em memória mesmo que antiga: assim um
+  // isolate novo não faz uma listagem para cada miniatura pedida ao mesmo tempo.
+  if (!mem.byId) await getList(env);
   let item = mem.byId?.get(id);
   // Pode ser um arquivo que acabou de chegar: recarrega a lista (no máximo a cada 3 s).
   if (!item && Date.now() - mem.listAt > 3000) {
@@ -697,7 +694,8 @@ function rememberThumb(key, entry) {
 }
 
 function imageResponse(entry, version) {
-  return new Response(entry.body, {
+  // Cópia: o buffer do cache é reaproveitado entre requisições.
+  return new Response(entry.body.slice(0), {
     headers: {
       'Content-Type': entry.type,
       // Com a versão na URL, o conteúdo nunca muda: o navegador pode guardar para sempre.

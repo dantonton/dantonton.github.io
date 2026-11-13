@@ -7,6 +7,8 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
+  // Guarda os logs no painel da Cloudflare (Workers > casamento-api > Logs).
+  "observability": { "enabled": true },
   "vars": {
     // Application (client) ID do app registrado no Azure/Entra (não é segredo).
     "MS_CLIENT_ID": "4e4e2b6b-e039-4b3b-8632-2084bd72b774",
