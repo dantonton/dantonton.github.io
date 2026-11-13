@@ -221,7 +221,7 @@
     .tile.has-img .tile-icon { display: none; }
     .badge-video {
       position: absolute;
-      bottom: 6px;
+      top: 6px;
       left: 6px;
       display: flex;
       align-items: center;
@@ -235,6 +235,29 @@
       pointer-events: none;
     }
     .badge-video svg { width: 11px; height: 11px; }
+    /* Legenda: quem enviou e quando (a data só se não for hoje). */
+    .tile-cap {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 18px 7px 5px;
+      background: linear-gradient(to top, rgb(20 20 10 / 0.62), rgb(20 20 10 / 0));
+      color: #fff;
+      font-size: 10px;
+      line-height: 1.25;
+      text-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+      pointer-events: none;
+    }
+    .cap-by { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .cap-by:empty { display: none; }
+    .cap-when { opacity: 0.92; font-variant-numeric: tabular-nums; }
+    @media (min-width: 600px) {
+      .tile-cap { padding: 24px 9px 7px; font-size: 12px; }
+    }
     .badge-mine {
       position: absolute;
       top: 6px;
@@ -709,6 +732,16 @@
        ===================================================================== */
     const tiles = new Map();
     const whenFormat = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const timeFormat = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const dayFormat = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
+
+    /** Hora do envio, e o dia só se não foi hoje. */
+    function shortWhen(iso) {
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return null;
+      const today = date.toDateString() === new Date().toDateString();
+      return { time: timeFormat.format(date), day: today ? '' : dayFormat.format(date) };
+    }
 
     function render() {
       const all = mergedItems();
@@ -774,6 +807,7 @@
         <button class="tile-open" type="button"><img alt="" decoding="async" loading="lazy"></button>
         <span class="tile-icon"></span>
         <span class="badge-video" hidden>${ICON.play}<span></span></span>
+        <span class="tile-cap"><span class="cap-by"></span><span class="cap-when"></span></span>
         <span class="badge-mine" hidden>Sua</span>
         <button class="tile-del" type="button" aria-label="Apagar" hidden>${ICON.trash}</button>`;
       const img = el.querySelector('img');
@@ -826,8 +860,14 @@
       el.querySelector('.badge-mine').hidden = !own;
       el.querySelector('.tile-del').hidden = !own;
 
+      const when = item.at ? shortWhen(item.at) : null;
+      el.querySelector('.cap-by').textContent = item.author ? `por ${item.author}` : '';
+      el.querySelector('.cap-when').textContent = when ? [when.day, when.time].filter(Boolean).join('\u2002·\u2002') : '';
+
       const kind = item.type === 'video' ? 'Vídeo' : 'Foto';
-      el.querySelector('.tile-open').setAttribute('aria-label', item.author ? `${kind} de ${item.author}` : kind);
+      const sent = item.type === 'video' ? 'enviado' : 'enviada';
+      const label = [kind, item.author && `de ${item.author}`, when && `${sent} ${when.day ? `em ${when.day} ` : ''}às ${when.time}`];
+      el.querySelector('.tile-open').setAttribute('aria-label', label.filter(Boolean).join(', '));
     }
 
     function duration(ms) {
