@@ -514,7 +514,7 @@
     <div class="lb-bar bottom">
       <div class="lb-info"><span class="lb-author" id="lb-author"></span><span class="lb-time" id="lb-time"></span></div>
       <div class="lb-actions">
-        <a class="lb-btn" id="lb-download" target="_blank" rel="noopener">
+        <a class="lb-btn" id="lb-download">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>
           Baixar
         </a>
@@ -644,7 +644,9 @@
       return data;
     }
 
-    const thumbUrl = (item, big = false) => `${API}/api/thumb/${encodeURIComponent(item.id)}${big ? '?size=big' : ''}`;
+    /** Miniatura pelo Worker; a versão na URL deixa o navegador guardar a imagem para sempre. */
+    const thumbUrl = (item, big = false) =>
+      `${API}/api/thumb/${encodeURIComponent(item.id)}?v=${encodeURIComponent(item.v ?? '')}${big ? '&size=big' : ''}`;
     const mediaUrl = (item) => `${API}/api/media/${encodeURIComponent(item.id)}`;
 
     /* =====================================================================
@@ -660,6 +662,7 @@
       /** Enviados nesta visita que o servidor ainda não mostra (ou ainda sem miniatura). */
       local: new Map(),
       refreshedAt: 0,
+      refreshCount: 0,
     };
 
     let refreshing = null;
@@ -676,6 +679,7 @@
         .finally(() => {
           state.loaded = true;
           state.refreshedAt = Date.now();
+          state.refreshCount++;
           refreshing = null;
           render();
         });
@@ -694,8 +698,7 @@
       for (const local of state.local.values()) {
         const remote = server.get(local.name);
         if (!remote) pending.push(local);
-        else if (remote.thumb) state.local.delete(local.name);
-        else server.set(local.name, { ...remote, preview: local.preview, full: local.full });
+        else server.set(local.name, { ...remote, preview: local.preview, full: local.full, fileName: local.fileName });
       }
       pending.sort((a, b) => (a.at < b.at ? 1 : -1));
       return [...pending, ...server.values()];
@@ -779,15 +782,11 @@
         el.classList.add('has-img');
       });
       img.addEventListener('error', () => {
-        const item = state.view.find((entry) => entry.name === el.dataset.name);
-        // A URL da lista pode ter expirado: tenta pelo Worker uma vez.
-        if (item?.id && !el.dataset.fallback) {
-          el.dataset.fallback = '1';
-          setSrc(el, thumbUrl(item));
-        } else {
-          img.removeAttribute('src');
-          el.classList.remove('has-img');
-        }
+        // Sem miniatura agora (ex.: a Microsoft ainda processando): mostra o ícone e tenta de novo
+        // na próxima atualização do álbum.
+        el.dataset.failed = String(state.refreshCount);
+        img.removeAttribute('src');
+        el.classList.remove('has-img');
       });
       el.querySelector('.tile-open').addEventListener('click', () => openLightbox(el.dataset.name));
       el.querySelector('.tile-del').addEventListener('click', () => removeItem(el.dataset.name));
@@ -802,8 +801,19 @@
     function updateTile(el, item) {
       el.dataset.name = item.name;
       const img = el.querySelector('img');
-      const src = item.thumb || item.preview;
-      if (src && el.dataset.src !== src && !img.classList.contains('ok')) setSrc(el, src);
+      if (!img.classList.contains('ok')) {
+        const failed = el.dataset.failed;
+        let src = item.preview || (item.id ? thumbUrl(item) : '');
+        if (failed !== undefined && item.id) {
+          src = thumbUrl(item);
+          if (Number(failed) === state.refreshCount) src = ''; // espera a próxima atualização
+          else src += `&r=${state.refreshCount}`;
+        }
+        if (src && el.dataset.src !== src) {
+          delete el.dataset.failed;
+          setSrc(el, src);
+        }
+      }
 
       if (el.dataset.type !== item.type) {
         el.dataset.type = item.type;
@@ -1239,7 +1249,7 @@
       els.lbDelete.hidden = !mine.has(item.name);
 
       if (item.id) {
-        els.lbDownload.href = mediaUrl(item);
+        els.lbDownload.href = `${mediaUrl(item)}?download=1`;
         els.lbDownload.removeAttribute('download');
       } else {
         els.lbDownload.href = item.full;
@@ -1258,7 +1268,7 @@
         video.controls = true;
         video.playsInline = true;
         video.preload = 'metadata';
-        const poster = item.thumb || item.preview;
+        const poster = item.preview || (item.id ? thumbUrl(item) : '');
         if (poster) video.poster = poster;
         video.src = item.full || mediaUrl(item);
         video.addEventListener('error', () => {
@@ -1274,8 +1284,9 @@
       img.alt = item.author ? `Foto de ${item.author}` : 'Foto';
       img.decoding = 'async';
       img.draggable = false;
-      const low = item.thumb || item.preview;
-      const high = item.id ? thumbUrl(item, true) : item.full;
+      const low = item.preview || (item.id ? thumbUrl(item) : '');
+      // Foto enviada daqui: o próprio arquivo; senão, a versão grande pelo Worker.
+      const high = item.full || (item.id ? thumbUrl(item, true) : '');
       img.src = low || high || '';
       if (high && high !== img.src) {
         const loader = new Image();

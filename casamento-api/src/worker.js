@@ -12,8 +12,8 @@
  *   POST /api/uploads               inicia um envio e devolve o token de exclusão
  *   PUT  /api/uploads/chunk         recebe um pedaço do arquivo e repassa ao OneDrive
  *   POST /api/delete                apaga um arquivo, se o token de exclusão bater
- *   GET  /api/thumb/:id[?size=big]  redireciona para a miniatura
- *   GET  /api/media/:id             redireciona para o arquivo original
+ *   GET  /api/thumb/:id[?size=big]  miniatura (bytes direto pelo Graph)
+ *   GET  /api/media/:id[?download]  arquivo original (download direto, ou redireciona para tocar vídeo)
  */
 
 const SCOPES = 'offline_access Files.ReadWrite.All User.Read';
@@ -21,8 +21,16 @@ const SCOPES = 'offline_access Files.ReadWrite.All User.Read';
 const FRAGMENT = 320 * 1024;
 /** ~8 MB por requisição: bem abaixo do limite de 100 MB do plano gratuito. */
 const CHUNK_SIZE = FRAGMENT * 25;
-/** Até este tamanho o arquivo vai inteiro numa requisição só (upload simples do Graph, sem sessão). */
-const SIMPLE_MAX = 20 * 1024 * 1024;
+/**
+ * Até este tamanho o arquivo vai inteiro numa requisição só, em fluxo, pelo upload simples do Graph
+ * (autenticado com o token normal). Acima disso usa sessão, cuja URL pré-autenticada falha às vezes.
+ * O limite de corpo do Worker no plano gratuito é 100 MB.
+ */
+const simpleMax = (env) => (Number(env.SIMPLE_MAX_MB) || 90) * 1024 * 1024;
+/** Miniaturas: tamanho na grade e na tela cheia, com alternativa se o primeiro falhar. */
+const THUMB_SIZES = { small: ['c400x400', 'large'], big: ['c1600x1600', 'large'] };
+const THUMB_TIMEOUT = 10_000;
+const THUMB_CACHE_BYTES = 24 * 1024 * 1024;
 const MAX_FILE = 4 * 1024 ** 3;
 const LIST_TTL = 20_000;
 const REDIRECT_TTL = 20 * 60_000;
@@ -59,6 +67,10 @@ const mem = {
   keys: null,
   /** Vira true se a URL de sessão só aceitar o PUT com o token (diagnóstico). */
   uploadNeedsToken: false,
+  /** Cache de miniaturas na memória do isolate (ordem de inserção = LRU simples). */
+  thumbs: new Map(),
+  thumbBytes: 0,
+  thumbFail: new Map(),
 };
 
 class HttpError extends Error {
@@ -107,7 +119,7 @@ async function route(request, env, url) {
   const file = method === 'GET' && pathname.match(/^\/api\/(thumb|media)\/([^/]+)$/);
   if (file) {
     const id = decodeURIComponent(file[2]);
-    return file[1] === 'thumb' ? thumb(env, id, url) : media(env, id, request);
+    return file[1] === 'thumb' ? thumb(env, id, url) : media(env, id, request, url);
   }
 
   throw new HttpError(404, 'not_found', 'Não encontrado');
@@ -235,8 +247,8 @@ async function saveTokens(env, data) {
   await Promise.all(writes);
 }
 
-async function getAccessToken(env, force = false) {
-  const soon = Date.now() + 60_000;
+async function getAccessToken(env, force = false, minValidity = 60_000) {
+  const soon = Date.now() + minValidity;
   if (!force && mem.access?.exp > soon) return mem.access.token;
   if (!force) {
     const cached = await env.ALBUM_KV.get('access', 'json');
@@ -313,7 +325,7 @@ async function fetchList(env) {
   const items = [];
   let next =
     `/drives/${folder.driveId}/items/${encodeURIComponent(folder.id)}/children` +
-    '?$top=200&$select=id,name,file,image,video,createdDateTime,size&$expand=thumbnails';
+    '?$top=200&$select=id,name,file,image,video,createdDateTime,size,cTag,eTag';
 
   for (let page = 0; next && page < 25; page++) {
     const data = await graphJson(env, next);
@@ -340,16 +352,15 @@ function toItem(raw) {
         : null;
   if (!type) return null;
 
-  const set = raw.thumbnails?.[0];
-  const preview = set?.large ?? set?.medium ?? null;
   const meta = raw.image ?? raw.video ?? {};
   return {
     id: raw.id,
     name: raw.name,
     type,
-    thumb: preview?.url ?? null,
-    w: meta.width ?? preview?.width ?? null,
-    h: meta.height ?? preview?.height ?? null,
+    // Versão do conteúdo: entra na URL da miniatura para o navegador poder guardar para sempre.
+    v: String(raw.cTag || raw.eTag || raw.size).replace(/[^\w]/g, '').slice(-24),
+    w: meta.width ?? null,
+    h: meta.height ?? null,
     dur: raw.video?.duration ?? null,
     at: raw.createdDateTime,
     size: raw.size,
@@ -389,7 +400,7 @@ async function createUpload(request, env) {
   const newName = () => `${[stamp(env), author, randomId()].filter(Boolean).join('_')}.${ext}`;
 
   // Arquivo pequeno: vai inteiro num PUT só, direto pela API do Graph (sem URL de sessão).
-  if (size <= SIMPLE_MAX) {
+  if (size <= simpleMax(env)) {
     const name = newName();
     return json({
       name,
@@ -437,25 +448,45 @@ async function uploadChunk(request, env) {
   const valid =
     total === session.s &&
     (simple
-      ? start === 0 && end === total - 1 && total <= SIMPLE_MAX
+      ? start === 0 && end === total - 1 && total <= simpleMax(env)
       : start <= end && end < total && end - start + 1 <= CHUNK_SIZE && start % FRAGMENT === 0);
   if (!valid) throw new HttpError(400, 'bad_range', 'Pedaço inválido');
+  const declared = request.headers.get('Content-Length');
+  if (declared !== null && Number(declared) !== end - start + 1) throw new HttpError(400, 'bad_length', 'Pedaço incompleto');
+
+  if (simple) {
+    // Em fluxo, sem guardar o arquivo na memória do Worker (até ~90 MB).
+    if (!request.body) throw new HttpError(400, 'bad_length', 'Pedaço incompleto');
+    const { readable, writable } = new FixedLengthStream(total);
+    request.body.pipeTo(writable).catch(() => {});
+    return simpleUpload(env, session, readable);
+  }
 
   const body = await request.arrayBuffer();
   if (body.byteLength !== end - start + 1) throw new HttpError(400, 'bad_length', 'Pedaço incompleto');
-
-  return simple ? simpleUpload(env, session, body) : sessionChunk(env, session, body, start, end, total);
+  return sessionChunk(env, session, body, start, end, total);
 }
 
 /** Upload simples: PUT /content autenticado, o mesmo tipo de chamada da listagem. */
 async function simpleUpload(env, session, body) {
   const folder = await getFolder(env);
   const path = `/drives/${folder.driveId}/items/${encodeURIComponent(folder.id)}:/${encodeURIComponent(session.n)}:`;
-  const res = await graph(env, `${path}/content?@microsoft.graph.conflictBehavior=fail`, {
+  // O corpo é um fluxo: não dá para repetir a requisição, então pega um token com folga de 15 min.
+  const token = await getAccessToken(env, false, 15 * 60_000);
+  const res = await fetch(`${graphBase(env)}${path}/content?@microsoft.graph.conflictBehavior=fail`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/octet-stream' },
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/octet-stream' },
     body,
   });
+  if (res.status === 401) {
+    // Token recusado: descarta para o próximo pedido renovar, e o navegador tenta de novo.
+    mem.access = null;
+    await env.ALBUM_KV.delete('access');
+    throw new HttpError(502, 'upload_failed', 'Falha ao enviar o arquivo');
+  }
+  if (res.status === 429 || res.status === 503) {
+    throw new HttpError(503, 'busy', 'Muita gente ao mesmo tempo, tente de novo em instantes');
+  }
 
   let item = res.ok ? await res.json().catch(() => ({})) : null;
   if (res.status === 409) {
@@ -608,24 +639,97 @@ async function deleteItem(request, env) {
    Miniaturas e arquivos originais (redirecionamentos)
    ========================================================================== */
 
+/**
+ * Miniatura pela própria API do Graph com "Prefer: noRedirect": os bytes vêm direto, com o token
+ * normal. O redirecionamento padrão leva a uma URL pré-autenticada que a Microsoft recusa às vezes.
+ */
 async function thumb(env, id, url) {
   await findItem(env, id);
+  const big = url.searchParams.get('size') === 'big';
+  const version = url.searchParams.get('v') ?? '';
+  const key = `${big ? 'big' : 'small'}:${id}:${version}`;
+
+  const hit = mem.thumbs.get(key);
+  if (hit) {
+    mem.thumbs.delete(key);
+    mem.thumbs.set(key, hit);
+    return imageResponse(hit, version);
+  }
+  if ((mem.thumbFail.get(key) ?? 0) > Date.now()) throw new HttpError(404, 'no_thumb', 'Miniatura indisponível');
+
   const folder = await getFolder(env);
   const base = `/drives/${folder.driveId}/items/${encodeURIComponent(id)}/thumbnails/0`;
-  const big = url.searchParams.get('size') === 'big';
-  const paths = big ? [`${base}/c1600x1600/content`, `${base}/large/content`] : [`${base}/large/content`];
-  return redirectFor(env, `thumb:${big ? 'big' : 'large'}:${id}`, paths);
+  let busy = false;
+  for (const size of THUMB_SIZES[big ? 'big' : 'small']) {
+    try {
+      const res = await graph(env, `${base}/${size}/content`, {
+        redirect: 'manual',
+        headers: { Prefer: 'noRedirect' },
+        signal: AbortSignal.timeout(THUMB_TIMEOUT),
+      });
+      const type = res.headers.get('Content-Type') ?? '';
+      if (res.ok && type.startsWith('image/')) {
+        const entry = { body: await res.arrayBuffer(), type };
+        rememberThumb(key, entry);
+        return imageResponse(entry, version);
+      }
+      await res.body?.cancel();
+    } catch (err) {
+      if (err instanceof HttpError && err.code === 'busy') busy = true;
+    }
+  }
+  if (busy) throw new HttpError(503, 'busy', 'Muita gente ao mesmo tempo, tente de novo em instantes');
+  if (mem.thumbFail.size > 5000) mem.thumbFail.clear();
+  mem.thumbFail.set(key, Date.now() + 60_000);
+  throw new HttpError(404, 'no_thumb', 'Miniatura indisponível');
 }
 
-async function media(env, id, request) {
-  await findItem(env, id);
+function rememberThumb(key, entry) {
+  const bytes = entry.body.byteLength;
+  if (bytes > THUMB_CACHE_BYTES / 8) return;
+  mem.thumbs.set(key, entry);
+  mem.thumbBytes += bytes;
+  for (const [oldKey, old] of mem.thumbs) {
+    if (mem.thumbBytes <= THUMB_CACHE_BYTES) break;
+    mem.thumbs.delete(oldKey);
+    mem.thumbBytes -= old.body.byteLength;
+  }
+}
+
+function imageResponse(entry, version) {
+  return new Response(entry.body, {
+    headers: {
+      'Content-Type': entry.type,
+      // Com a versão na URL, o conteúdo nunca muda: o navegador pode guardar para sempre.
+      'Cache-Control': version ? 'public, max-age=31536000, immutable' : 'public, max-age=3600',
+    },
+  });
+}
+
+/**
+ * Original: com ?download=1 vem direto pelo Graph ("Prefer: noRedirect"), como anexo. Sem isso
+ * (vídeo tocando), redireciona para a URL de download, que aceita Range para avançar o vídeo.
+ */
+async function media(env, id, request, url) {
+  const item = await findItem(env, id);
   const folder = await getFolder(env);
-  return redirectFor(
-    env,
-    `media:${id}`,
-    [`/drives/${folder.driveId}/items/${encodeURIComponent(id)}/content`],
-    request.headers.get('Range'),
-  );
+  const path = `/drives/${folder.driveId}/items/${encodeURIComponent(id)}/content`;
+
+  if (url.searchParams.has('download')) {
+    const res = await graph(env, path, { redirect: 'manual', headers: { Prefer: 'noRedirect' } });
+    if (res.ok) {
+      const headers = new Headers({
+        'Content-Type': res.headers.get('Content-Type') ?? 'application/octet-stream',
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(item.name)}`,
+        'Cache-Control': 'private, max-age=3600',
+      });
+      const length = res.headers.get('Content-Length');
+      if (length) headers.set('Content-Length', length);
+      return new Response(res.body, { headers });
+    }
+    await res.body?.cancel();
+  }
+  return redirectFor(env, `media:${id}`, [path], request.headers.get('Range'));
 }
 
 /** O Graph responde 302 para uma URL temporária e pré-autenticada: repassa o redirecionamento. */
@@ -783,3 +887,4 @@ function page(title, body, status = 200) {
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
 }
+
